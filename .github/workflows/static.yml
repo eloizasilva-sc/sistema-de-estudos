@@ -1,0 +1,2115 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concursada 2026 - Dashboard Profissional</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&amp;family=Open+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: 'Open Sans', sans-serif;
+    }
+    
+    .font-heading {
+      font-family: 'Montserrat', sans-serif;
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(-20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes scaleIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    .slide-in {
+      animation: slideIn 0.5s ease-out;
+    }
+    
+    .scale-in {
+      animation: scaleIn 0.4s ease-out;
+    }
+    
+    .card-shadow {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+    }
+    
+    .card-shadow:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
+    
+    .gold-gradient {
+      background: linear-gradient(135deg, #D4AF37 0%, #F4E4A6 50%, #D4AF37 100%);
+    }
+    
+    .navy-gradient {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    }
+    
+    .success-gradient {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    }
+    
+    .calendar-day {
+      transition: all 0.2s ease;
+    }
+    
+    .calendar-day:hover {
+      background: #f1f5f9;
+      transform: scale(1.05);
+    }
+    
+    .calendar-day.studied {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: white;
+      font-weight: 700;
+      position: relative;
+    }
+    
+    .calendar-day.studied::after {
+      content: '✓';
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+    
+    .calendar-day.today {
+      border: 3px solid #D4AF37;
+      font-weight: 700;
+      color: #1e3a8a;
+    }
+    
+    input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: #1e3a8a;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    input[type="checkbox"]:hover {
+      transform: scale(1.15);
+    }
+    
+    .metric-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
+    
+    .metric-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tab-btn {
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .tab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #D4AF37 0%, #F4E4A6 100%);
+      transition: width 0.3s ease;
+    }
+    
+    .tab-btn.active::after {
+      width: 100%;
+    }
+    
+    .pomodoro-timer {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+      border-radius: 20px;
+      padding: 32px;
+      color: white;
+      box-shadow: 0 8px 24px rgba(30, 58, 138, 0.3);
+    }
+    
+    .shield-icon {
+      filter: drop-shadow(0 4px 6px rgba(212, 175, 55, 0.3));
+    }
+    
+    .method-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .method-checkbox:hover {
+      border-color: #1e3a8a;
+      background: #f9fafb;
+    }
+    
+    .method-checkbox.checked {
+      border-color: #059669;
+      background: #ecfdf5;
+    }
+    
+    .method-checkbox input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: #059669;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full bg-gray-50">
+  <div id="app" class="min-h-full w-full flex flex-col scrollbar-thin"><!-- Professional Header -->
+   <header class="flex-shrink-0 bg-white border-b-2 border-gray-200 px-8 py-6 fade-in">
+    <div class="flex items-center justify-between">
+     <div class="flex items-center gap-6"><!-- Logo Badge -->
+      <div class="relative shield-icon">
+       <svg class="w-20 h-20" viewbox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><!-- Shield --> <path d="M50 5 L10 20 L10 45 C10 70 50 95 50 95 C50 95 90 70 90 45 L90 20 Z" fill="#1e3a8a" stroke="#D4AF37" stroke-width="3" /> <!-- Highway Lines --> <line x1="45" y1="30" x2="45" y2="70" stroke="white" stroke-width="2" /> <line x1="55" y1="30" x2="55" y2="70" stroke="white" stroke-width="2" /> <line x1="40" y1="40" x2="40" y2="50" stroke="#D4AF37" stroke-width="2" /> <line x1="40" y1="60" x2="40" y2="70" stroke="#D4AF37" stroke-width="2" /> <line x1="60" y1="40" x2="60" y2="50" stroke="#D4AF37" stroke-width="2" /> <line x1="60" y1="60" x2="60" y2="70" stroke="#D4AF37" stroke-width="2" /> <!-- Justice Scale --> <circle cx="50" cy="35" r="3" fill="#D4AF37" /> <line x1="50" y1="35" x2="50" y2="45" stroke="#D4AF37" stroke-width="2" /> <line x1="40" y1="45" x2="60" y2="45" stroke="#D4AF37" stroke-width="2" /> <path d="M38 45 L35 50 L41 50 Z" fill="#D4AF37" /> <path d="M62 45 L59 50 L65 50 Z" fill="#D4AF37" />
+       </svg>
+      </div>
+      <div class="flex-1">
+       <h1 id="mission-title" class="text-4xl font-heading font-black text-gray-900 tracking-tight">CONCURSADA 2026</h1>
+       <p id="mission-motto" class="text-base text-gray-600 font-semibold mt-1">🎯 Rumo à Aprovação</p>
+      </div><button onclick="openHeaderEditModal()" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl font-bold text-gray-700 transition-all flex items-center gap-2">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+       </svg> EDITAR </button>
+     </div><!-- Mission Tabs -->
+     <div class="flex gap-3 bg-gray-100 rounded-xl p-2 flex-wrap">
+      <div id="mission-tabs-container" class="flex gap-3 flex-wrap"><!-- Dynamic mission tabs will be rendered here -->
+      </div><button onclick="openNewMissionModal()" class="px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg text-sm font-bold transition-all hover:opacity-90 shadow-md flex items-center gap-2">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+       </svg> NOVA MISSÃO </button>
+     </div>
+    </div>
+   </header>
+   <div class="flex-1 flex flex-col overflow-hidden"><!-- Main Content Area -->
+    <main class="flex-1 flex flex-col overflow-hidden p-8"><!-- Pomodoro Full Screen -->
+     <div id="pomodoro-screen" class="hidden flex-1 flex items-center justify-center p-8">
+      <div class="text-center max-w-6xl w-full"><!-- Timer Display com Configuração Integrada -->
+       <div class="mb-10">
+        <div id="pomodoro-display" class="text-[180px] font-heading font-black text-gray-900 leading-none mb-6" style="text-shadow: 0 4px 20px rgba(0,0,0,0.1)">
+         25:00
+        </div>
+        <div id="pomodoro-phase" class="text-4xl font-bold text-gray-600 mb-6">
+         🍅 FOCO TOTAL
+        </div><!-- Controles Rápidos de Tempo -->
+        <div class="flex items-center justify-center gap-3 mb-6"><button onclick="adjustTimer(-5)" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl font-bold text-gray-700 transition-all text-lg"> -5 min </button> <button onclick="adjustTimer(-1)" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl font-bold text-gray-700 transition-all text-lg"> -1 min </button> <button onclick="editPomodoroTime()" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-lg shadow-lg"> ⚙️ AJUSTAR TEMPO </button> <button onclick="adjustTimer(1)" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl font-bold text-gray-700 transition-all text-lg"> +1 min </button> <button onclick="adjustTimer(5)" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl font-bold text-gray-700 transition-all text-lg"> +5 min </button>
+        </div>
+       </div><!-- Frase Motivacional Editável -->
+       <div class="mb-10">
+        <div id="pomodoro-phrase-display" class="text-3xl font-semibold text-blue-900 italic mb-3 cursor-pointer hover:bg-blue-50 p-4 rounded-xl transition-all" onclick="editPomodoroPhrase()">
+         "A disciplina é a ponte entre metas e conquistas"
+        </div><button onclick="editPomodoroPhrase()" class="text-sm text-blue-600 hover:text-blue-800 font-semibold underline"> ✏️ Editar Frase </button>
+       </div><!-- Controls -->
+       <div class="flex gap-6 justify-center mb-10"><button onclick="startPomodoro()" id="pomodoro-start-btn" class="px-16 py-6 bg-green-600 text-white rounded-2xl text-3xl font-bold hover:bg-green-700 transition-all shadow-xl hover:scale-105"> ▶️ INICIAR </button> <button onclick="pausePomodoro()" id="pomodoro-pause-btn" class="hidden px-16 py-6 bg-yellow-500 text-white rounded-2xl text-3xl font-bold hover:bg-yellow-600 transition-all shadow-xl hover:scale-105"> ⏸️ PAUSAR </button> <button onclick="resetPomodoro()" class="px-16 py-6 bg-red-600 text-white rounded-2xl text-3xl font-bold hover:bg-red-700 transition-all shadow-xl hover:scale-105"> 🔄 RESETAR </button>
+       </div><!-- Stats Cards -->
+       <div class="grid grid-cols-4 gap-6 max-w-4xl mx-auto mb-8">
+        <div class="bg-white rounded-2xl p-6 card-shadow">
+         <div class="text-5xl font-black text-blue-900 mb-2" id="pomodoro-cycles">
+          0
+         </div>
+         <div class="text-sm text-gray-600 font-semibold">
+          🍅 Ciclos Hoje
+         </div>
+        </div>
+        <div class="bg-white rounded-2xl p-6 card-shadow">
+         <div class="text-5xl font-black text-green-600 mb-2" id="pomodoro-focus-time">
+          0h
+         </div>
+         <div class="text-sm text-gray-600 font-semibold">
+          ⏱️ Tempo Foco
+         </div>
+        </div>
+        <div class="bg-white rounded-2xl p-6 card-shadow">
+         <div class="text-5xl font-black text-orange-500 mb-2" id="pomodoro-break-time">
+          0h
+         </div>
+         <div class="text-sm text-gray-600 font-semibold">
+          ☕ Pausas
+         </div>
+        </div>
+        <div class="bg-white rounded-2xl p-6 card-shadow">
+         <div class="text-5xl font-black text-purple-600 mb-2" id="pomodoro-total-time">
+          0h
+         </div>
+         <div class="text-sm text-gray-600 font-semibold">
+          📊 Total
+         </div>
+        </div>
+       </div><!-- Configurações Avançadas (Colapsável) -->
+       <div class="max-w-3xl mx-auto"><button onclick="togglePomodoroSettings()" class="w-full p-4 bg-gray-100 hover:bg-gray-200 rounded-xl font-bold text-gray-700 transition-all flex items-center justify-between"> <span>⚙️ Configurações Avançadas</span>
+         <svg id="settings-arrow" class="w-6 h-6 transition-transform" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+         </svg></button>
+        <div id="pomodoro-settings" class="hidden mt-4 p-6 bg-white rounded-2xl card-shadow">
+         <h4 class="text-lg font-bold text-gray-900 mb-6">⏲️ Duração dos Períodos</h4>
+         <div class="grid grid-cols-3 gap-6">
+          <div><label class="block text-sm text-gray-700 mb-3 font-semibold">🍅 Período de Foco</label> <input type="number" id="pomodoro-focus-duration" class="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 text-gray-900 font-bold text-center text-xl" value="25" min="1" max="60"> <span class="text-xs text-gray-500 mt-2 block">minutos</span>
+          </div>
+          <div><label class="block text-sm text-gray-700 mb-3 font-semibold">☕ Pausa Curta</label> <input type="number" id="pomodoro-break-duration" class="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 text-gray-900 font-bold text-center text-xl" value="5" min="1" max="30"> <span class="text-xs text-gray-500 mt-2 block">minutos</span>
+          </div>
+          <div><label class="block text-sm text-gray-700 mb-3 font-semibold">🎯 Pausa Longa</label> <input type="number" id="pomodoro-long-break" class="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 text-gray-900 font-bold text-center text-xl" value="15" min="1" max="60"> <span class="text-xs text-gray-500 mt-2 block">minutos</span>
+          </div>
+         </div>
+         <div class="mt-6 p-4 bg-blue-50 rounded-xl">
+          <p class="text-sm text-blue-900">💡 <strong>Dica:</strong> A pausa longa acontece automaticamente a cada 4 ciclos completos de foco.</p>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Metric Cards Grid -->
+     <div class="flex-shrink-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"><!-- Success Rate Card -->
+      <div class="metric-card card-shadow scale-in" style="animation-delay: 0.1s">
+       <div class="flex items-center justify-between mb-4">
+        <div class="text-3xl">
+         📊
+        </div>
+        <div class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+         ATIVO
+        </div>
+       </div>
+       <div class="text-gray-600 text-sm font-semibold mb-2">
+        Taxa de Sucesso
+       </div>
+       <div id="success-rate" class="text-4xl font-heading font-black text-gray-900 mb-1">
+        0%
+       </div>
+       <div class="text-xs text-gray-500">
+        Acertos / Total
+       </div>
+      </div><!-- Study Hours Card -->
+      <div class="metric-card card-shadow scale-in" style="animation-delay: 0.2s">
+       <div class="flex items-center justify-between mb-4">
+        <div class="text-3xl">
+         ⏱️
+        </div>
+        <div class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
+         TEMPO
+        </div>
+       </div>
+       <div class="text-gray-600 text-sm font-semibold mb-2">
+        Horas de Estudo
+       </div>
+       <div id="study-hours" class="text-4xl font-heading font-black text-gray-900 mb-1">
+        0h
+       </div>
+       <div class="text-xs text-gray-500">
+        Esta semana
+       </div>
+      </div><!-- Ranking Card -->
+      <div class="metric-card card-shadow scale-in" style="animation-delay: 0.3s">
+       <div class="flex items-center justify-between mb-4">
+        <div class="text-3xl">
+         🏆
+        </div>
+        <div id="rank-badge" class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-bold">
+         RECRUTA
+        </div>
+       </div>
+       <div class="text-gray-600 text-sm font-semibold mb-2">
+        Ranking Atual
+       </div>
+       <div id="current-rank" class="text-4xl font-heading font-black text-gray-900 mb-1">
+        🔴
+       </div>
+       <div class="text-xs text-gray-500">
+        Baseado no desempenho
+       </div>
+      </div><!-- Next Mission Card -->
+      <div class="metric-card card-shadow scale-in" style="animation-delay: 0.4s">
+       <div class="flex items-center justify-between mb-4">
+        <div class="text-3xl">
+         📈
+        </div>
+        <div class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">
+         META
+        </div>
+       </div>
+       <div class="text-gray-600 text-sm font-semibold mb-2">
+        Próxima Missão
+       </div>
+       <div id="next-mission" class="text-4xl font-heading font-black text-gray-900 mb-1">
+        -
+       </div>
+       <div class="text-xs text-gray-500">
+        Simulado agendado
+       </div>
+      </div>
+     </div><!-- Calendar and Content Area -->
+     <div class="flex-1 flex gap-6 overflow-hidden"><!-- Main Data Table -->
+      <div class="flex-1 bg-white rounded-2xl card-shadow flex flex-col overflow-hidden slide-in">
+       <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+         <h2 class="text-2xl font-heading font-bold text-gray-900">📚 Centro de Estudos</h2>
+         <div class="flex gap-3"><button onclick="openDisciplineModal()" class="px-6 py-3 navy-gradient text-white rounded-xl font-bold hover:opacity-90 transition-all"> + DISCIPLINA </button>
+         </div>
+        </div>
+       </div>
+       <div class="flex-1 overflow-auto scrollbar-thin p-6" id="content-area"><!-- Dynamic content here -->
+       </div>
+      </div><!-- Calendar Widget -->
+      <div class="w-96 flex flex-col gap-6"><!-- Calendar Card -->
+       <div class="bg-white rounded-2xl card-shadow p-6 slide-in" style="animation-delay: 0.2s">
+        <div class="flex items-center justify-between mb-6">
+         <h3 class="text-xl font-heading font-bold text-gray-900">📅 Calendário</h3>
+         <div class="flex gap-2"><button onclick="changeCalendarMonth(-1)" class="p-2 hover:bg-gray-100 rounded-lg transition-all">
+           <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+           </svg></button> <button onclick="changeCalendarMonth(1)" class="p-2 hover:bg-gray-100 rounded-lg transition-all">
+           <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+           </svg></button>
+         </div>
+        </div>
+        <div id="calendar-header" class="text-center mb-4">
+         <div class="text-lg font-heading font-bold text-gray-900">
+          Janeiro 2025
+         </div>
+        </div>
+        <div class="grid grid-cols-7 gap-2 mb-2">
+         <div class="text-center text-xs font-bold text-gray-500 py-2">
+          DOM
+         </div>
+         <div class="text-center text-xs font-bold text-gray-500 py-2">
+          SEG
+         </div>
+         <div class="text-center text-xs font-bold text-gray-500 py-2">
+          TER
+         </div>
+         <div class="text-center text-xs font-bold text-gray-500 py-2">
+          QUA
+         </div>
+         <div class="text-center text-xs font-bold text-gray-500 py-2">
+          QUI
+         </div>
+         <div class="text-center text-xs font-bold text-gray-500 py-2">
+          SEX
+         </div>
+         <div class="text-center text-xs font-bold text-gray-500 py-2">
+          SÁB
+         </div>
+        </div>
+        <div id="calendar-grid" class="grid grid-cols-7 gap-2"><!-- Calendar days will be rendered here -->
+        </div>
+        <div class="mt-6 pt-6 border-t border-gray-200 space-y-3">
+         <div class="flex items-center gap-3 text-sm">
+          <div class="w-4 h-4 rounded success-gradient flex items-center justify-center text-white font-bold text-xs">
+           ✓
+          </div><span class="text-gray-600">Dia estudado</span>
+         </div>
+         <div class="flex items-center gap-3 text-sm">
+          <div class="w-4 h-4 rounded border-3 border-yellow-500"></div><span class="text-gray-600">Hoje</span>
+         </div><button onclick="toggleStudyToday()" class="w-full mt-3 py-3 success-gradient text-white rounded-xl font-bold hover:opacity-90 transition-all"> ✓ MARCAR HOJE </button>
+        </div>
+       </div><!-- Quick Stats -->
+       <div class="bg-white rounded-2xl card-shadow p-6 slide-in" style="animation-delay: 0.3s">
+        <h3 class="text-xl font-heading font-bold text-gray-900 mb-4">📊 Estatísticas</h3>
+        <div class="space-y-4">
+         <div class="flex items-center justify-between p-3 bg-blue-50 rounded-xl"><span class="text-sm font-semibold text-gray-700">🍅 Pomodoros Hoje</span> <span class="text-2xl font-black text-blue-900" id="stats-pomodoros">0</span>
+         </div>
+         <div class="flex items-center justify-between p-3 bg-green-50 rounded-xl"><span class="text-sm font-semibold text-gray-700">📅 Dias Estudados</span> <span class="text-2xl font-black text-green-600" id="stats-days">0</span>
+         </div>
+         <div class="flex items-center justify-between p-3 bg-purple-50 rounded-xl"><span class="text-sm font-semibold text-gray-700">✅ Taxa Sucesso</span> <span class="text-2xl font-black text-purple-600" id="stats-success">0%</span>
+         </div>
+        </div><button onclick="setModule('pomodoro')" class="w-full mt-6 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-lg"> 🍅 ABRIR POMODORO </button>
+       </div>
+      </div>
+     </div>
+    </main><!-- Footer -->
+    <footer class="flex-shrink-0 bg-gray-900 text-white py-4 px-8 text-center">
+     <p class="text-sm font-semibold">💻 Desenvolvido por <span class="text-yellow-400 font-bold">Eloiza Silva</span></p>
+    </footer>
+   </div><!-- All Modals --> <!-- New Mission Modal -->
+   <div id="new-mission-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md scale-in">
+     <h3 class="text-2xl font-heading font-bold text-gray-900 mb-6">🎯 Nova Missão</h3>
+     <div class="space-y-5">
+      <div><label class="block text-sm text-gray-700 mb-2 font-semibold">Nome da Missão/Concurso</label> <input type="text" id="new-mission-name" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 transition-all text-gray-900" placeholder="Ex: PC-RN, TJ-RN, PF">
+      </div>
+      <div><label class="block text-sm text-gray-700 mb-3 font-semibold">Escolha um Ícone</label>
+       <div class="grid grid-cols-5 gap-3"><button onclick="selectMissionIcon('🚔')" class="mission-icon-btn p-3 text-3xl hover:bg-blue-100 rounded-xl transition-all border-2 border-transparent" data-icon="🚔">🚔</button> <button onclick="selectMissionIcon('⚖️')" class="mission-icon-btn p-3 text-3xl hover:bg-blue-100 rounded-xl transition-all border-2 border-transparent" data-icon="⚖️">⚖️</button> <button onclick="selectMissionIcon('🏛️')" class="mission-icon-btn p-3 text-3xl hover:bg-blue-100 rounded-xl transition-all border-2 border-transparent" data-icon="🏛️">🏛️</button> <button onclick="selectMissionIcon('📚')" class="mission-icon-btn p-3 text-3xl hover:bg-blue-100 rounded-xl transition-all border-2 border-transparent" data-icon="📚">📚</button> <button onclick="selectMissionIcon('🎓')" class="mission-icon-btn p-3 text-3xl hover:bg-blue-100 rounded-xl transition-all border-2 border-transparent" data-icon="🎓">🎓</button> <button onclick="selectMissionIcon('👮')" class="mission-icon-btn p-3 text-3xl hover:bg-blue-100 rounded-xl transition-all border-2 border-transparent" data-icon="👮">👮</button> <button onclick="selectMissionIcon('🔒')" class="mission-icon-btn p-3 text-3xl hover:bg-blue-100 rounded-xl transition-all border-2 border-transparent" data-icon="🔒">🔒</button> <button onclick="selectMissionIcon('🏅')" class="mission-icon-btn p-3 text-3xl hover:bg-blue-100 rounded-xl transition-all border-2 border-transparent" data-icon="🏅">🏅</button> <button onclick="selectMissionIcon('🎯')" class="mission-icon-btn p-3 text-3xl hover:bg-blue-100 rounded-xl transition-all border-2 border-transparent" data-icon="🎯">🎯</button> <button onclick="selectMissionIcon('📖')" class="mission-icon-btn p-3 text-3xl hover:bg-blue-100 rounded-xl transition-all border-2 border-transparent" data-icon="📖">📖</button>
+       </div>
+      </div>
+     </div>
+     <div class="flex gap-4 mt-8"><button onclick="closeNewMissionModal()" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-bold transition-all text-gray-700">CANCELAR</button> <button onclick="saveNewMission()" class="flex-1 py-3 navy-gradient text-white rounded-xl font-bold hover:opacity-90 transition-all">CRIAR MISSÃO</button>
+     </div>
+    </div>
+   </div><!-- Discipline Modal -->
+   <div id="discipline-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md scale-in">
+     <h3 class="text-2xl font-heading font-bold text-gray-900 mb-6">📚 Nova Disciplina</h3>
+     <div class="space-y-5">
+      <div><label class="block text-sm text-gray-700 mb-2 font-semibold">Nome da Disciplina</label> <input type="text" id="discipline-name" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 transition-all text-gray-900" placeholder="Ex: Direito Constitucional">
+      </div>
+      <div><label class="block text-sm text-gray-700 mb-3 font-semibold">Escolha uma Cor</label>
+       <div class="flex gap-3 flex-wrap"><button onclick="selectColor('#1e3a8a')" class="w-12 h-12 rounded-full bg-blue-900 color-btn hover:scale-110 transition-transform border-2 border-transparent" data-color="#1e3a8a"></button> <button onclick="selectColor('#059669')" class="w-12 h-12 rounded-full bg-green-600 color-btn hover:scale-110 transition-transform border-2 border-transparent" data-color="#059669"></button> <button onclick="selectColor('#dc2626')" class="w-12 h-12 rounded-full bg-red-600 color-btn hover:scale-110 transition-transform border-2 border-transparent" data-color="#dc2626"></button> <button onclick="selectColor('#d97706')" class="w-12 h-12 rounded-full bg-amber-600 color-btn hover:scale-110 transition-transform border-2 border-transparent" data-color="#d97706"></button> <button onclick="selectColor('#0891b2')" class="w-12 h-12 rounded-full bg-cyan-600 color-btn hover:scale-110 transition-transform border-2 border-transparent" data-color="#0891b2"></button> <button onclick="selectColor('#7c3aed')" class="w-12 h-12 rounded-full bg-violet-600 color-btn hover:scale-110 transition-transform border-2 border-transparent" data-color="#7c3aed"></button> <button onclick="selectColor('#db2777')" class="w-12 h-12 rounded-full bg-pink-600 color-btn hover:scale-110 transition-transform border-2 border-transparent" data-color="#db2777"></button> <button onclick="selectColor('#65a30d')" class="w-12 h-12 rounded-full bg-lime-600 color-btn hover:scale-110 transition-transform border-2 border-transparent" data-color="#65a30d"></button>
+       </div>
+      </div><!-- Copiar para outra missão -->
+      <div class="pt-4 border-t border-gray-200"><label class="flex items-center gap-3 cursor-pointer p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all"> <input type="checkbox" id="copy-to-other-mission" class="w-5 h-5 rounded accent-color-blue-900">
+        <div>
+         <div class="text-sm font-bold text-gray-900">
+          📋 Copiar para outras missões
+         </div>
+         <div class="text-xs text-gray-600">
+          Criar esta disciplina em todas as missões
+         </div>
+        </div></label>
+      </div>
+     </div>
+     <div class="flex gap-4 mt-8"><button onclick="closeDisciplineModal()" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-bold transition-all text-gray-700">CANCELAR</button> <button onclick="saveDiscipline()" class="flex-1 py-3 navy-gradient text-white rounded-xl font-bold hover:opacity-90 transition-all">CONFIRMAR</button>
+     </div>
+    </div>
+   </div><!-- Content Modal -->
+   <div id="content-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-2xl scale-in max-h-[90%] overflow-auto scrollbar-thin">
+     <div class="flex items-center justify-between mb-6">
+      <h3 class="text-2xl font-heading font-bold text-gray-900">📝 Novo Conteúdo</h3><button onclick="closeContentModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-all">
+       <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+       </svg></button>
+     </div>
+     <div class="grid grid-cols-2 gap-5 mb-6">
+      <div class="col-span-2"><label class="block text-sm text-gray-700 mb-2 font-semibold">Conteúdo/Assunto</label> <input type="text" id="content-name" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 transition-all text-gray-900" placeholder="Ex: Art. 144 da Constituição">
+      </div>
+      <div><label class="block text-sm text-gray-700 mb-2 font-semibold">Data do Estudo</label> <input type="date" id="content-date" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 transition-all text-gray-900">
+      </div>
+     </div><!-- Métodos de Estudo Inline -->
+     <div class="mb-6 p-5 bg-gray-50 rounded-xl">
+      <h4 class="text-lg font-bold text-gray-900 mb-4">📚 Métodos de Estudo Utilizados</h4>
+      <div class="grid grid-cols-2 gap-4 mb-4"><label class="method-checkbox" id="content-method-aula-label"> <input type="checkbox" id="content-method-aula" class="rounded">
+        <div>
+         <div class="font-semibold text-gray-900">
+          📺 Videoaula
+         </div>
+         <div class="text-xs text-gray-500">
+          Assistiu aula sobre o tema
+         </div>
+        </div></label> <label class="method-checkbox" id="content-method-pdf-label"> <input type="checkbox" id="content-method-pdf" class="rounded">
+        <div>
+         <div class="font-semibold text-gray-900">
+          📄 PDF/Resumo
+         </div>
+         <div class="text-xs text-gray-500">
+          Leu material em PDF
+         </div>
+        </div></label> <label class="method-checkbox" id="content-method-lei-label"> <input type="checkbox" id="content-method-lei" class="rounded">
+        <div>
+         <div class="font-semibold text-gray-900">
+          ⚖️ Lei Seca
+         </div>
+         <div class="text-xs text-gray-500">
+          Estudou legislação pura
+         </div>
+        </div></label> <label class="method-checkbox" id="content-method-quest-label"> <input type="checkbox" id="content-method-quest" class="rounded" onchange="toggleContentQuestionsFields()">
+        <div>
+         <div class="font-semibold text-gray-900">
+          ❓ Questões
+         </div>
+         <div class="text-xs text-gray-500">
+          Resolveu exercícios
+         </div>
+        </div></label>
+      </div>
+      <div id="content-questions-fields" class="hidden grid grid-cols-2 gap-4 pt-4 border-t border-gray-300">
+       <div><label class="block text-sm text-gray-700 mb-2 font-semibold">Questões Respondidas</label> <input type="number" id="content-questions-total" class="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 transition-all text-gray-900" placeholder="0" min="0" value="0">
+       </div>
+       <div><label class="block text-sm text-gray-700 mb-2 font-semibold">Acertos</label> <input type="number" id="content-questions-correct" class="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 transition-all text-gray-900" placeholder="0" min="0" value="0">
+       </div>
+      </div>
+     </div>
+     <div class="flex gap-4"><button onclick="closeContentModal()" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-bold transition-all text-gray-700">CANCELAR</button> <button onclick="saveContent()" class="flex-1 py-3 navy-gradient text-white rounded-xl font-bold hover:opacity-90 transition-all">✅ SALVAR E FECHAR</button>
+     </div>
+    </div>
+   </div><!-- Pomodoro Phrase Modal -->
+   <div id="phrase-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-2xl scale-in">
+     <h3 class="text-2xl font-heading font-bold text-gray-900 mb-6">✏️ Editar Frase Motivacional</h3>
+     <div class="space-y-5">
+      <div><label class="block text-sm text-gray-700 mb-2 font-semibold">Digite sua frase de motivação</label> <textarea id="phrase-input" rows="4" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 transition-all text-gray-900 text-lg" placeholder="Ex: A disciplina é a ponte entre metas e conquistas"></textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-3"><button onclick="setQuickPhrase('A disciplina é a ponte entre metas e conquistas')" class="p-3 bg-blue-50 hover:bg-blue-100 rounded-xl text-sm font-semibold text-blue-900 transition-all"> 💪 Disciplina </button> <button onclick="setQuickPhrase('Cada esforço me aproxima da aprovação')" class="p-3 bg-green-50 hover:bg-green-100 rounded-xl text-sm font-semibold text-green-900 transition-all"> 🎯 Esforço </button> <button onclick="setQuickPhrase('O sucesso é a soma de pequenos esforços repetidos')" class="p-3 bg-purple-50 hover:bg-purple-100 rounded-xl text-sm font-semibold text-purple-900 transition-all"> 🌟 Sucesso </button> <button onclick="setQuickPhrase('Foco, força e fé - minha aprovação está chegando!')" class="p-3 bg-orange-50 hover:bg-orange-100 rounded-xl text-sm font-semibold text-orange-900 transition-all"> 🔥 Foco </button>
+      </div>
+     </div>
+     <div class="flex gap-4 mt-8"><button onclick="closePhraseModal()" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-bold transition-all text-gray-700">CANCELAR</button> <button onclick="savePomodoroPhrase()" class="flex-1 py-3 navy-gradient text-white rounded-xl font-bold hover:opacity-90 transition-all">SALVAR</button>
+     </div>
+    </div>
+   </div><!-- Header Edit Modal -->
+   <div id="header-edit-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md scale-in">
+     <h3 class="text-2xl font-heading font-bold text-gray-900 mb-6">✏️ Editar Cabeçalho</h3>
+     <div class="space-y-5">
+      <div><label class="block text-sm text-gray-700 mb-2 font-semibold">Título da Missão</label> <input type="text" id="header-title-input" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 transition-all text-gray-900" placeholder="Ex: CONCURSADA 2026">
+      </div>
+      <div><label class="block text-sm text-gray-700 mb-2 font-semibold">Lema Motivacional</label> <input type="text" id="header-motto-input" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 transition-all text-gray-900" placeholder="Ex: Rumo à Aprovação">
+      </div>
+     </div>
+     <div class="flex gap-4 mt-8"><button onclick="closeHeaderEditModal()" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-bold transition-all text-gray-700">CANCELAR</button> <button onclick="saveHeaderEdit()" class="flex-1 py-3 navy-gradient text-white rounded-xl font-bold hover:opacity-90 transition-all">SALVAR</button>
+     </div>
+    </div>
+   </div><!-- Pomodoro Time Edit Modal -->
+   <div id="time-edit-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md scale-in">
+     <h3 class="text-2xl font-heading font-bold text-gray-900 mb-6">⏱️ Editar Cronômetro</h3>
+     <div class="space-y-5">
+      <div class="text-center mb-6">
+       <p class="text-sm text-gray-600 mb-2">Defina o tempo manualmente</p>
+       <div class="text-gray-500 text-xs">
+        ⚠️ Isso pausará o cronômetro atual
+       </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+       <div><label class="block text-sm text-gray-700 mb-2 font-semibold">Minutos</label> <input type="number" id="time-edit-minutes" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 transition-all text-gray-900 text-center font-bold text-2xl" placeholder="25" min="0" max="120" value="25">
+       </div>
+       <div><label class="block text-sm text-gray-700 mb-2 font-semibold">Segundos</label> <input type="number" id="time-edit-seconds" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 transition-all text-gray-900 text-center font-bold text-2xl" placeholder="0" min="0" max="59" value="0">
+       </div>
+      </div>
+      <div class="grid grid-cols-3 gap-2 mt-4"><button onclick="setQuickTime(25, 0)" class="p-3 bg-blue-50 hover:bg-blue-100 rounded-xl text-sm font-semibold text-blue-900 transition-all"> 25:00 </button> <button onclick="setQuickTime(15, 0)" class="p-3 bg-green-50 hover:bg-green-100 rounded-xl text-sm font-semibold text-green-900 transition-all"> 15:00 </button> <button onclick="setQuickTime(5, 0)" class="p-3 bg-orange-50 hover:bg-orange-100 rounded-xl text-sm font-semibold text-orange-900 transition-all"> 05:00 </button> <button onclick="setQuickTime(10, 0)" class="p-3 bg-purple-50 hover:bg-purple-100 rounded-xl text-sm font-semibold text-purple-900 transition-all"> 10:00 </button> <button onclick="setQuickTime(30, 0)" class="p-3 bg-red-50 hover:bg-red-100 rounded-xl text-sm font-semibold text-red-900 transition-all"> 30:00 </button> <button onclick="setQuickTime(1, 0)" class="p-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-sm font-semibold text-gray-900 transition-all"> 01:00 </button>
+      </div>
+     </div>
+     <div class="flex gap-4 mt-8"><button onclick="closeTimeEditModal()" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-bold transition-all text-gray-700">CANCELAR</button> <button onclick="savePomodoroTime()" class="flex-1 py-3 navy-gradient text-white rounded-xl font-bold hover:opacity-90 transition-all">APLICAR</button>
+     </div>
+    </div>
+   </div><!-- Method Modal -->
+   <div id="method-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md scale-in">
+     <h3 class="text-2xl font-heading font-bold text-gray-900 mb-6">📚 Métodos de Estudo</h3>
+     <div class="space-y-4"><label class="method-checkbox" id="method-aula-label"> <input type="checkbox" id="method-aula" class="rounded">
+       <div>
+        <div class="font-semibold text-gray-900">
+         📺 Videoaula
+        </div>
+        <div class="text-xs text-gray-500">
+         Assistiu aula sobre o tema
+        </div>
+       </div></label> <label class="method-checkbox" id="method-pdf-label"> <input type="checkbox" id="method-pdf" class="rounded">
+       <div>
+        <div class="font-semibold text-gray-900">
+         📄 PDF/Resumo
+        </div>
+        <div class="text-xs text-gray-500">
+         Leu material em PDF
+        </div>
+       </div></label> <label class="method-checkbox" id="method-lei-label"> <input type="checkbox" id="method-lei" class="rounded">
+       <div>
+        <div class="font-semibold text-gray-900">
+         ⚖️ Lei Seca
+        </div>
+        <div class="text-xs text-gray-500">
+         Estudou legislação pura
+        </div>
+       </div></label> <label class="method-checkbox" id="method-quest-label"> <input type="checkbox" id="method-quest" class="rounded" onchange="toggleQuestionsFields()">
+       <div>
+        <div class="font-semibold text-gray-900">
+         ❓ Questões
+        </div>
+        <div class="text-xs text-gray-500">
+         Resolveu exercícios
+        </div>
+       </div></label>
+      <div id="questions-fields" class="hidden pl-8 pt-2 space-y-3">
+       <div><label class="block text-sm text-gray-700 mb-2 font-semibold">Questões Respondidas</label> <input type="number" id="method-questions-total" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 transition-all text-gray-900" placeholder="0" min="0">
+       </div>
+       <div><label class="block text-sm text-gray-700 mb-2 font-semibold">Acertos</label> <input type="number" id="method-questions-correct" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-900 transition-all text-gray-900" placeholder="0" min="0">
+       </div>
+      </div>
+     </div>
+     <div class="flex gap-4 mt-8"><button onclick="closeMethodModal()" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-bold transition-all text-gray-700">CANCELAR</button> <button onclick="saveMethod()" class="flex-1 py-3 navy-gradient text-white rounded-xl font-bold hover:opacity-90 transition-all">CONFIRMAR</button>
+     </div>
+    </div>
+   </div><!-- Loading Overlay -->
+   <div id="loading-overlay" class="fixed inset-0 bg-white/90 backdrop-blur-sm z-[100] hidden items-center justify-center">
+    <div class="text-center">
+     <div class="w-16 h-16 border-4 border-blue-900 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><span class="text-xl font-heading font-bold text-gray-900">Processando...</span>
+    </div>
+   </div><!-- Toast Container -->
+   <div id="toast-container" class="fixed bottom-6 right-6 z-[100] space-y-3"></div>
+  </div>
+  <script>
+    // Global state
+    let allData = [];
+    let currentWeek = 1;
+    let selectedColor = '#1e3a8a';
+    let isLoading = false;
+    let currentModule = 'prf';
+    let currentCalendarMonth = new Date().getMonth();
+    let currentCalendarYear = new Date().getFullYear();
+    let currentMethodContentId = null;
+    let currentDisciplineId = null;
+    let selectedMissionIcon = '🚔';
+    let allMissions = [];
+    
+    // Pomodoro state
+    let pomodoroInterval = null;
+    let pomodoroSeconds = 0;
+    let pomodoroRunning = false;
+    let pomodoroPhase = 'focus'; // 'focus', 'break', 'longBreak'
+    let pomodoroCyclesCompleted = 0;
+    let pomodoroTotalFocusTime = 0;
+    let pomodoroTotalBreakTime = 0;
+    let pomodoroPhrase = 'A disciplina é a ponte entre metas e conquistas';
+    let audioContext = null;
+    let alarmOscillator = null;
+
+    const defaultConfig = {
+      mission_title: 'CONCURSADA 2026',
+      motto: 'Rumo à Aprovação'
+    };
+
+    const dataHandler = {
+      onDataChanged(data) {
+        allData = data;
+        updateUI();
+      }
+    };
+
+    async function init() {
+      if (window.elementSdk) {
+        await window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            document.getElementById('mission-title').textContent = config.mission_title || defaultConfig.mission_title;
+            document.getElementById('mission-motto').textContent = '🎯 ' + (config.motto || defaultConfig.motto);
+          },
+          mapToCapabilities: () => ({
+            recolorables: [],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ['mission_title', config.mission_title || defaultConfig.mission_title],
+            ['motto', config.motto || defaultConfig.motto]
+          ])
+        });
+      }
+
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+          showToast('⚠️ Erro ao inicializar sistema', 'error');
+        }
+      }
+
+      loadMissions();
+      renderCalendar();
+    }
+
+    function loadMissions() {
+      // Carregar missões customizadas do banco de dados
+      allMissions = allData.filter(d => d.type === 'mission');
+      
+      // Se não houver missões, criar as padrões
+      if (allMissions.length === 0) {
+        createDefaultMissions();
+      } else {
+        renderMissionTabs();
+        // Ativar a primeira missão ou a última usada
+        const nonPomodoroMissions = allMissions.filter(m => m.module_id !== 'pomodoro');
+        if (nonPomodoroMissions.length > 0) {
+          setModule(nonPomodoroMissions[0].module_id);
+        } else {
+          setModule('pomodoro');
+        }
+      }
+    }
+
+    async function createDefaultMissions() {
+      if (allData.length + 3 > 999) {
+        showToast('⚠️ Não foi possível criar missões padrão', 'error');
+        return;
+      }
+
+      showLoading(true);
+      
+      await window.dataSdk.create({
+        type: 'mission',
+        module_id: 'prf',
+        name: 'MISSÃO PRF',
+        icon: '🚔',
+        created_at: new Date().toISOString()
+      });
+
+      await window.dataSdk.create({
+        type: 'mission',
+        module_id: 'tce',
+        name: 'MISSÃO TCE-RN',
+        icon: '⚖️',
+        created_at: new Date().toISOString()
+      });
+
+      await window.dataSdk.create({
+        type: 'mission',
+        module_id: 'pomodoro',
+        name: 'POMODORO',
+        icon: '🍅',
+        created_at: new Date().toISOString()
+      });
+
+      showLoading(false);
+    }
+
+    function renderMissionTabs() {
+      const container = document.getElementById('mission-tabs-container');
+      allMissions = allData.filter(d => d.type === 'mission');
+      
+      // Sempre adicionar Pomodoro no final
+      const pomodoroMission = allMissions.find(m => m.module_id === 'pomodoro');
+      const otherMissions = allMissions.filter(m => m.module_id !== 'pomodoro');
+      
+      let html = '';
+      
+      otherMissions.forEach(mission => {
+        const isActive = mission.module_id === currentModule;
+        const activeClasses = isActive ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900';
+        
+        html += `
+          <div class="relative group">
+            <button onclick="setModule('${mission.module_id}')" id="module-${mission.module_id}" class="tab-btn px-8 py-4 rounded-lg text-sm font-bold transition-all ${activeClasses}">
+              ${mission.icon} ${mission.name}
+            </button>
+            <button onclick="deleteMission('${mission.__backendId}')" class="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-all hover:bg-red-700 flex items-center justify-center">
+              ×
+            </button>
+          </div>
+        `;
+      });
+      
+      // Adicionar Pomodoro sem botão de excluir
+      if (pomodoroMission) {
+        const isActive = currentModule === 'pomodoro';
+        const activeClasses = isActive ? 'active bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900';
+        
+        html += `
+          <button onclick="setModule('pomodoro')" id="module-pomodoro" class="tab-btn px-8 py-4 rounded-lg text-sm font-bold transition-all ${activeClasses}">
+            🍅 POMODORO
+          </button>
+        `;
+      }
+      
+      container.innerHTML = html;
+    }
+
+    function updateUI() {
+      renderMissionTabs();
+      updateMetrics();
+      renderContent();
+      renderCalendar();
+    }
+
+    function openNewMissionModal() {
+      document.getElementById('new-mission-name').value = '';
+      selectedMissionIcon = '🚔';
+      updateMissionIconSelection();
+      document.getElementById('new-mission-modal').classList.remove('hidden');
+      document.getElementById('new-mission-modal').classList.add('flex');
+    }
+
+    function closeNewMissionModal() {
+      document.getElementById('new-mission-modal').classList.add('hidden');
+      document.getElementById('new-mission-modal').classList.remove('flex');
+    }
+
+    function selectMissionIcon(icon) {
+      selectedMissionIcon = icon;
+      updateMissionIconSelection();
+    }
+
+    function updateMissionIconSelection() {
+      document.querySelectorAll('.mission-icon-btn').forEach(btn => {
+        if (btn.dataset.icon === selectedMissionIcon) {
+          btn.classList.add('bg-blue-100', 'border-blue-900', 'scale-110');
+        } else {
+          btn.classList.remove('bg-blue-100', 'border-blue-900', 'scale-110');
+        }
+      });
+    }
+
+    async function saveNewMission() {
+      const name = document.getElementById('new-mission-name').value.trim();
+      
+      if (!name) {
+        showToast('⚠️ Digite o nome da missão', 'error');
+        return;
+      }
+
+      if (allData.length >= 999) {
+        showToast('⚠️ Limite de 999 registros atingido', 'error');
+        return;
+      }
+
+      // Criar ID único para a missão
+      const missionId = 'mission_' + Date.now();
+
+      showLoading(true);
+      const result = await window.dataSdk.create({
+        type: 'mission',
+        module_id: missionId,
+        name: name.toUpperCase(),
+        icon: selectedMissionIcon,
+        created_at: new Date().toISOString()
+      });
+      showLoading(false);
+
+      if (result.isOk) {
+        showToast(`✅ Missão "${name}" criada com sucesso!`, 'success');
+        closeNewMissionModal();
+        renderMissionTabs();
+        setModule(missionId);
+      } else {
+        showToast('❌ Erro ao criar missão', 'error');
+      }
+    }
+
+    async function deleteMission(missionId) {
+      const mission = allData.find(d => d.__backendId === missionId);
+      if (!mission) return;
+
+      // Confirmar exclusão
+      const tempConfirmBtn = document.createElement('div');
+      tempConfirmBtn.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4';
+      tempConfirmBtn.innerHTML = `
+        <div class="bg-white rounded-2xl p-8 max-w-md scale-in">
+          <h3 class="text-2xl font-heading font-bold text-gray-900 mb-4">⚠️ Excluir Missão?</h3>
+          <p class="text-gray-700 mb-2">Tem certeza que deseja excluir a missão <strong>"${mission.name}"</strong>?</p>
+          <p class="text-sm text-red-600 mb-6">⚠️ Todas as disciplinas e conteúdos desta missão serão perdidos!</p>
+          <div class="flex gap-4">
+            <button onclick="this.closest('.fixed').remove()" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-bold transition-all text-gray-700">CANCELAR</button>
+            <button onclick="confirmDeleteMission('${missionId}')" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all">EXCLUIR</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(tempConfirmBtn);
+    }
+
+    async function confirmDeleteMission(missionId) {
+      const mission = allData.find(d => d.__backendId === missionId);
+      if (!mission) return;
+
+      // Fechar modal de confirmação
+      document.querySelectorAll('.fixed').forEach(el => {
+        if (el.innerHTML.includes('Excluir Missão?')) {
+          el.remove();
+        }
+      });
+
+      // Excluir todas as disciplinas e conteúdos desta missão
+      const disciplines = allData.filter(d => d.type === 'discipline' && d.module === mission.module_id);
+      const contents = allData.filter(d => d.type === 'content' && d.module === mission.module_id);
+      const markers = allData.filter(d => d.type === 'study_marker' && d.module === mission.module_id);
+
+      showLoading(true);
+      
+      for (const content of contents) {
+        await window.dataSdk.delete(content);
+      }
+      
+      for (const discipline of disciplines) {
+        await window.dataSdk.delete(discipline);
+      }
+      
+      for (const marker of markers) {
+        await window.dataSdk.delete(marker);
+      }
+      
+      await window.dataSdk.delete(mission);
+      
+      showLoading(false);
+
+      showToast(`✅ Missão "${mission.name}" excluída`, 'success');
+      
+      renderMissionTabs();
+      
+      // Se excluiu a missão atual, mudar para outra
+      if (currentModule === mission.module_id) {
+        const remainingMissions = allData.filter(d => d.type === 'mission' && d.__backendId !== missionId && d.module_id !== 'pomodoro');
+        if (remainingMissions.length > 0) {
+          setModule(remainingMissions[0].module_id);
+        } else {
+          setModule('pomodoro');
+        }
+      }
+    }
+
+    function updateMetrics() {
+      const contents = allData.filter(d => d.type === 'content' && d.module === currentModule);
+      
+      let totalQuestions = 0;
+      let totalCorrect = 0;
+      
+      const studiedDates = new Set();
+      
+      contents.forEach(c => {
+        if (c.study_done) {
+          totalQuestions += c.study_questions || 0;
+          totalCorrect += c.study_correct || 0;
+          
+          if (c.study_date) {
+            studiedDates.add(c.study_date);
+          }
+        }
+      });
+      
+      // Adicionar dias marcados manualmente
+      allData.filter(d => d.type === 'study_marker' && d.module === currentModule).forEach(m => {
+        if (m.study_date) {
+          studiedDates.add(m.study_date);
+        }
+      });
+      
+      const totalStudyDays = studiedDates.size;
+      const successRate = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+      const studyHours = totalStudyDays * 2;
+      
+      document.getElementById('success-rate').textContent = `${successRate}%`;
+      document.getElementById('study-hours').textContent = `${studyHours}h`;
+      
+      // Ranking baseado em taxa de sucesso E dias de estudo
+      let rankEmoji = '🔴';
+      let rankText = 'RECRUTA';
+      let rankColor = 'bg-gray-100 text-gray-700';
+      
+      const rankScore = (successRate * 0.7) + (Math.min(totalStudyDays, 30) * 3.33 * 0.3);
+      
+      if (rankScore >= 85) {
+        rankEmoji = '🔵';
+        rankText = 'COMANDANTE';
+        rankColor = 'bg-blue-100 text-blue-700';
+      } else if (rankScore >= 65) {
+        rankEmoji = '🟢';
+        rankText = 'INSPETOR';
+        rankColor = 'bg-green-100 text-green-700';
+      } else if (rankScore >= 40) {
+        rankEmoji = '🟡';
+        rankText = 'AGENTE';
+        rankColor = 'bg-yellow-100 text-yellow-700';
+      }
+      
+      document.getElementById('current-rank').textContent = rankEmoji;
+      const rankBadge = document.getElementById('rank-badge');
+      rankBadge.textContent = rankText;
+      rankBadge.className = `px-3 py-1 rounded-full text-xs font-bold ${rankColor}`;
+      
+      const weekData = allData.find(d => d.type === 'week' && d.module === currentModule);
+      if (weekData?.simulado_date) {
+        const date = new Date(weekData.simulado_date);
+        document.getElementById('next-mission').textContent = date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+      } else {
+        document.getElementById('next-mission').textContent = '-';
+      }
+    }
+
+    function renderCalendar() {
+      const today = new Date();
+      const firstDay = new Date(currentCalendarYear, currentCalendarMonth, 1);
+      const lastDay = new Date(currentCalendarYear, currentCalendarMonth + 1, 0);
+      const startDay = firstDay.getDay();
+      const daysInMonth = lastDay.getDate();
+      
+      const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      
+      document.getElementById('calendar-header').innerHTML = `
+        <div class="text-lg font-heading font-bold text-gray-900">${monthNames[currentCalendarMonth]} ${currentCalendarYear}</div>
+      `;
+      
+      const grid = document.getElementById('calendar-grid');
+      grid.innerHTML = '';
+      
+      const studiedDates = new Set();
+      allData.filter(d => d.type === 'content' && d.module === currentModule && d.study_done).forEach(c => {
+        if (c.study_date) {
+          studiedDates.add(c.study_date);
+        }
+      });
+      
+      allData.filter(d => d.type === 'study_marker' && d.module === currentModule).forEach(m => {
+        if (m.study_date) {
+          studiedDates.add(m.study_date);
+        }
+      });
+      
+      for (let i = 0; i < startDay; i++) {
+        const emptyCell = document.createElement('div');
+        grid.appendChild(emptyCell);
+      }
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayCell = document.createElement('div');
+        dayCell.className = 'calendar-day w-10 h-10 flex items-center justify-center rounded-lg text-sm font-semibold cursor-pointer';
+        dayCell.textContent = day;
+        
+        const dateStr = `${currentCalendarYear}-${String(currentCalendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        
+        const isToday = today.getFullYear() === currentCalendarYear && 
+                        today.getMonth() === currentCalendarMonth && 
+                        today.getDate() === day;
+        
+        const isStudied = studiedDates.has(dateStr);
+        
+        if (isStudied) {
+          dayCell.classList.add('studied');
+        }
+        
+        if (isToday) {
+          dayCell.classList.add('today');
+        }
+        
+        // Adiciona click handler para marcar/desmarcar qualquer dia
+        dayCell.addEventListener('click', () => toggleStudyDay(dateStr));
+        
+        grid.appendChild(dayCell);
+      }
+    }
+
+    function changeCalendarMonth(delta) {
+      currentCalendarMonth += delta;
+      
+      if (currentCalendarMonth > 11) {
+        currentCalendarMonth = 0;
+        currentCalendarYear++;
+      } else if (currentCalendarMonth < 0) {
+        currentCalendarMonth = 11;
+        currentCalendarYear--;
+      }
+      
+      renderCalendar();
+    }
+
+    function renderContent() {
+      const container = document.getElementById('content-area');
+      const disciplines = allData.filter(d => d.type === 'discipline' && d.module === currentModule);
+      
+      if (disciplines.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-20">
+            <div class="text-8xl mb-6">📚</div>
+            <h4 class="text-2xl font-heading font-bold mb-3 text-gray-900">Nenhuma Disciplina Cadastrada</h4>
+            <p class="text-gray-600 mb-8">Comece adicionando suas disciplinas de estudo</p>
+            <button onclick="openDisciplineModal()" class="px-8 py-4 navy-gradient text-white rounded-xl font-bold hover:opacity-90 transition-all">
+              + ADICIONAR DISCIPLINA
+            </button>
+          </div>
+        `;
+        return;
+      }
+      
+      let html = '<div class="space-y-4">';
+      
+      disciplines.forEach((disc, index) => {
+        const contents = allData.filter(c => c.type === 'content' && c.discipline_id === disc.__backendId && c.module === currentModule);
+        
+        let totalQuestions = 0;
+        let totalCorrect = 0;
+        contents.forEach(c => {
+          totalQuestions += c.study_questions || 0;
+          totalCorrect += c.study_correct || 0;
+        });
+        
+        const successRate = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+        
+        const studiedDates = new Set();
+        contents.forEach(c => {
+          if (c.study_done && c.study_date) {
+            studiedDates.add(c.study_date);
+          }
+        });
+        const hoursStudied = studiedDates.size * 2;
+        
+        html += `
+          <div class="bg-gray-50 rounded-xl p-6 hover:bg-gray-100 transition-all" style="animation-delay: ${index * 0.1}s">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-4 cursor-pointer" onclick="toggleDiscipline('${disc.__backendId}')">
+                <div class="w-4 h-4 rounded-full" style="background: ${disc.color}"></div>
+                <span class="font-bold text-lg text-gray-900">${disc.name}</span>
+                <span class="text-sm text-gray-500">(${contents.length} conteúdos)</span>
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                  ⏱️ ${hoursStudied}h estudadas
+                </span>
+                <span class="px-3 py-1 rounded-full text-xs font-bold ${successRate >= 70 ? 'bg-green-100 text-green-700' : successRate >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}">
+                  ${successRate}% de acertos
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="event.stopPropagation(); openContentModalForDiscipline('${disc.__backendId}')" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all text-sm">
+                  + Conteúdo
+                </button>
+                <button onclick="event.stopPropagation(); deleteDiscipline('${disc.__backendId}')" class="p-2 hover:bg-red-100 rounded-lg text-red-600 transition-all" title="Excluir disciplina">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div id="discipline-${disc.__backendId}" class="hidden mt-6 pt-6 border-t border-gray-200">
+              ${renderDisciplineTable(disc.__backendId)}
+            </div>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    function renderDisciplineTable(disciplineId) {
+      const contents = allData.filter(c => c.type === 'content' && c.discipline_id === disciplineId && c.module === currentModule);
+      
+      if (contents.length === 0) {
+        return `<p class="text-center text-gray-500 py-8">Nenhum conteúdo cadastrado. Clique em "+ Conteúdo" acima para adicionar.</p>`;
+      }
+      
+      let html = `
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-100 border-b-2 border-gray-300">
+              <tr>
+                <th class="px-4 py-3 text-left font-bold text-gray-700">CONTEÚDO</th>
+                <th class="px-3 py-3 text-center font-bold text-gray-700">DATA</th>
+                <th class="px-3 py-3 text-center font-bold text-gray-700">MÉTODOS</th>
+                <th class="px-3 py-3 text-center font-bold text-gray-700">Q</th>
+                <th class="px-3 py-3 text-center font-bold text-gray-700">A</th>
+                <th class="px-3 py-3 text-center font-bold text-gray-700">%</th>
+                <th class="px-3 py-3 text-center font-bold text-gray-700">AÇÕES</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      contents.forEach(c => {
+        const percentage = c.study_questions > 0 ? Math.round((c.study_correct / c.study_questions) * 100) : 0;
+        
+        const methods = [];
+        if (c.study_aula) methods.push('📺');
+        if (c.study_pdf) methods.push('📄');
+        if (c.study_lei) methods.push('⚖️');
+        if (c.study_questions > 0) methods.push('❓');
+        const methodsText = methods.length > 0 ? methods.join(' ') : '-';
+        
+        html += `
+          <tr class="border-t border-gray-200 hover:bg-gray-50 transition-all">
+            <td class="px-4 py-4 font-semibold text-gray-900">${c.content || '-'}</td>
+            <td class="px-3 py-4 text-center">
+              <input type="date" value="${c.study_date || ''}" onchange="updateContentField('${c.__backendId}', 'study_date', this.value)" class="w-32 bg-white border-2 border-gray-200 rounded-lg px-2 py-2 text-xs focus:border-blue-900">
+            </td>
+            <td class="px-3 py-4 text-center">
+              <div class="text-lg mb-1">${methodsText}</div>
+              <button onclick="openMethodModal('${c.__backendId}')" class="text-xs text-blue-600 hover:text-blue-800 font-semibold underline">Editar</button>
+            </td>
+            <td class="px-3 py-4 text-center font-bold text-gray-900">${c.study_questions || 0}</td>
+            <td class="px-3 py-4 text-center font-bold text-gray-900">${c.study_correct || 0}</td>
+            <td class="px-3 py-4 text-center">
+              <span class="px-3 py-1 rounded-full text-xs font-bold ${percentage >= 70 ? 'bg-green-100 text-green-700' : percentage >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}">${percentage}%</span>
+            </td>
+            <td class="px-3 py-4 text-center">
+              <button onclick="deleteContent('${c.__backendId}')" class="p-2 hover:bg-red-100 rounded-lg text-red-600 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+      
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+      
+      return html;
+    }
+
+    function toggleDiscipline(id) {
+      const element = document.getElementById(`discipline-${id}`);
+      if (element) {
+        element.classList.toggle('hidden');
+      }
+    }
+
+    function setModule(module) {
+      currentModule = module;
+      
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-gray-900', 'text-white');
+        btn.classList.add('text-gray-600');
+      });
+      
+      const activeBtn = document.getElementById(`module-${module}`);
+      if (activeBtn) {
+        activeBtn.classList.add('active', 'bg-gray-900', 'text-white');
+        activeBtn.classList.remove('text-gray-600');
+      }
+      
+      // Show/hide screens
+      if (module === 'pomodoro') {
+        document.getElementById('pomodoro-screen').classList.remove('hidden');
+        document.getElementById('pomodoro-screen').classList.add('flex');
+        document.querySelector('.flex.gap-6.overflow-hidden').classList.add('hidden');
+        updatePomodoroStats();
+      } else {
+        document.getElementById('pomodoro-screen').classList.add('hidden');
+        document.getElementById('pomodoro-screen').classList.remove('flex');
+        document.querySelector('.flex.gap-6.overflow-hidden').classList.remove('hidden');
+        updateUI();
+        
+        const missionData = allData.find(d => d.type === 'mission' && d.module_id === module);
+        if (missionData) {
+          showToast(`🎯 ${missionData.name} ativada!`, 'success');
+        }
+      }
+    }
+
+    // Pomodoro Functions
+    function adjustTimer(minutes) {
+      // Ajusta o timer em minutos (positivo ou negativo)
+      const newSeconds = Math.max(60, pomodoroSeconds + (minutes * 60)); // Mínimo 1 minuto
+      pomodoroSeconds = newSeconds;
+      updatePomodoroDisplay();
+      showToast(`⏱️ Tempo ajustado: ${Math.floor(pomodoroSeconds / 60)} minutos`, 'info', 2000);
+    }
+
+    function togglePomodoroSettings() {
+      const settings = document.getElementById('pomodoro-settings');
+      const arrow = document.getElementById('settings-arrow');
+      
+      if (settings.classList.contains('hidden')) {
+        settings.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        settings.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function startPomodoro() {
+      if (pomodoroRunning) return;
+      
+      pomodoroRunning = true;
+      document.getElementById('pomodoro-start-btn').classList.add('hidden');
+      document.getElementById('pomodoro-pause-btn').classList.remove('hidden');
+      
+      if (pomodoroSeconds === 0) {
+        const focusDuration = parseInt(document.getElementById('pomodoro-focus-duration').value) || 25;
+        pomodoroSeconds = focusDuration * 60;
+      }
+      
+      pomodoroInterval = setInterval(() => {
+        pomodoroSeconds--;
+        updatePomodoroDisplay();
+        
+        if (pomodoroSeconds <= 0) {
+          completePomodoroPhase();
+        }
+      }, 1000);
+    }
+
+    function pausePomodoro() {
+      if (!pomodoroRunning) return;
+      
+      pomodoroRunning = false;
+      clearInterval(pomodoroInterval);
+      
+      document.getElementById('pomodoro-start-btn').classList.remove('hidden');
+      document.getElementById('pomodoro-pause-btn').classList.add('hidden');
+    }
+
+    function resetPomodoro() {
+      clearInterval(pomodoroInterval);
+      pomodoroRunning = false;
+      pomodoroPhase = 'focus';
+      
+      const focusDuration = parseInt(document.getElementById('pomodoro-focus-duration').value) || 25;
+      pomodoroSeconds = focusDuration * 60;
+      
+      document.getElementById('pomodoro-start-btn').classList.remove('hidden');
+      document.getElementById('pomodoro-pause-btn').classList.add('hidden');
+      
+      updatePomodoroDisplay();
+      document.getElementById('pomodoro-phase').textContent = '🍅 FOCO TOTAL';
+    }
+
+    function completePomodoroPhase() {
+      pomodoroRunning = false;
+      clearInterval(pomodoroInterval);
+      
+      playAlarm();
+      
+      if (pomodoroPhase === 'focus') {
+        pomodoroCyclesCompleted++;
+        const focusDuration = parseInt(document.getElementById('pomodoro-focus-duration').value) || 25;
+        pomodoroTotalFocusTime += focusDuration;
+        
+        // Salvar sessão no histórico
+        savePomodoroSession();
+        
+        // Decide se é pausa curta ou longa
+        if (pomodoroCyclesCompleted % 4 === 0) {
+          pomodoroPhase = 'longBreak';
+          const longBreak = parseInt(document.getElementById('pomodoro-long-break').value) || 15;
+          pomodoroSeconds = longBreak * 60;
+          document.getElementById('pomodoro-phase').textContent = '🎯 PAUSA LONGA - RELAXE!';
+          showToast('🎉 4 Pomodoros completos! Pausa longa!', 'success', 6000);
+        } else {
+          pomodoroPhase = 'break';
+          const breakDuration = parseInt(document.getElementById('pomodoro-break-duration').value) || 5;
+          pomodoroSeconds = breakDuration * 60;
+          document.getElementById('pomodoro-phase').textContent = '☕ PAUSA - DESCANSE!';
+          showToast('✅ Pomodoro completo! Hora da pausa!', 'success', 6000);
+        }
+      } else {
+        // Acabou pausa, volta ao foco
+        const breakDuration = pomodoroPhase === 'longBreak' 
+          ? parseInt(document.getElementById('pomodoro-long-break').value) || 15
+          : parseInt(document.getElementById('pomodoro-break-duration').value) || 5;
+        pomodoroTotalBreakTime += breakDuration;
+        
+        pomodoroPhase = 'focus';
+        const focusDuration = parseInt(document.getElementById('pomodoro-focus-duration').value) || 25;
+        pomodoroSeconds = focusDuration * 60;
+        document.getElementById('pomodoro-phase').textContent = '🍅 FOCO TOTAL';
+        showToast('🔥 Pausa acabou! Bora focar!', 'info', 6000);
+      }
+      
+      document.getElementById('pomodoro-start-btn').classList.remove('hidden');
+      document.getElementById('pomodoro-pause-btn').classList.add('hidden');
+      
+      updatePomodoroDisplay();
+      updatePomodoroStats();
+    }
+
+    function updatePomodoroDisplay() {
+      const minutes = Math.floor(pomodoroSeconds / 60);
+      const seconds = pomodoroSeconds % 60;
+      
+      document.getElementById('pomodoro-display').textContent = 
+        `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function updatePomodoroStats() {
+      document.getElementById('pomodoro-cycles').textContent = pomodoroCyclesCompleted;
+      document.getElementById('pomodoro-focus-time').textContent = formatMinutesToHours(pomodoroTotalFocusTime);
+      document.getElementById('pomodoro-break-time').textContent = formatMinutesToHours(pomodoroTotalBreakTime);
+      document.getElementById('pomodoro-total-time').textContent = formatMinutesToHours(pomodoroTotalFocusTime + pomodoroTotalBreakTime);
+      
+      // Update sidebar stats
+      document.getElementById('stats-pomodoros').textContent = pomodoroCyclesCompleted;
+      
+      const contents = allData.filter(d => d.type === 'content');
+      const studiedDates = new Set();
+      contents.forEach(c => {
+        if (c.study_done && c.study_date) {
+          studiedDates.add(c.study_date);
+        }
+      });
+      allData.filter(d => d.type === 'study_marker').forEach(m => {
+        if (m.study_date) {
+          studiedDates.add(m.study_date);
+        }
+      });
+      
+      document.getElementById('stats-days').textContent = studiedDates.size;
+      
+      let totalQuestions = 0;
+      let totalCorrect = 0;
+      contents.forEach(c => {
+        if (c.study_done) {
+          totalQuestions += c.study_questions || 0;
+          totalCorrect += c.study_correct || 0;
+        }
+      });
+      
+      const successRate = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+      document.getElementById('stats-success').textContent = `${successRate}%`;
+    }
+
+    function formatMinutesToHours(minutes) {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      if (hours > 0) {
+        return `${hours}h`;
+      }
+      return `${mins}min`;
+    }
+
+    function playAlarm() {
+      try {
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        // Toca 3 beeps
+        for (let i = 0; i < 3; i++) {
+          setTimeout(() => {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+          }, i * 600);
+        }
+      } catch (error) {
+        console.log('Alarm sound not available');
+      }
+    }
+
+    function editPomodoroPhrase() {
+      document.getElementById('phrase-input').value = pomodoroPhrase;
+      document.getElementById('phrase-modal').classList.remove('hidden');
+      document.getElementById('phrase-modal').classList.add('flex');
+    }
+
+    function closePhraseModal() {
+      document.getElementById('phrase-modal').classList.add('hidden');
+      document.getElementById('phrase-modal').classList.remove('flex');
+    }
+
+    function setQuickPhrase(phrase) {
+      document.getElementById('phrase-input').value = phrase;
+    }
+
+    function savePomodoroPhrase() {
+      const newPhrase = document.getElementById('phrase-input').value.trim();
+      if (newPhrase) {
+        pomodoroPhrase = newPhrase;
+        document.getElementById('pomodoro-phrase-display').textContent = `"${pomodoroPhrase}"`;
+        showToast('✅ Frase atualizada!', 'success');
+      }
+      closePhraseModal();
+    }
+
+    function editPomodoroTime() {
+      // Pausa o cronômetro se estiver rodando
+      if (pomodoroRunning) {
+        pausePomodoro();
+      }
+      
+      // Preenche os campos com o tempo atual
+      const currentMinutes = Math.floor(pomodoroSeconds / 60);
+      const currentSeconds = pomodoroSeconds % 60;
+      
+      document.getElementById('time-edit-minutes').value = currentMinutes;
+      document.getElementById('time-edit-seconds').value = currentSeconds;
+      
+      document.getElementById('time-edit-modal').classList.remove('hidden');
+      document.getElementById('time-edit-modal').classList.add('flex');
+    }
+
+    function closeTimeEditModal() {
+      document.getElementById('time-edit-modal').classList.add('hidden');
+      document.getElementById('time-edit-modal').classList.remove('flex');
+    }
+
+    function setQuickTime(minutes, seconds) {
+      document.getElementById('time-edit-minutes').value = minutes;
+      document.getElementById('time-edit-seconds').value = seconds;
+    }
+
+    function savePomodoroTime() {
+      const minutes = parseInt(document.getElementById('time-edit-minutes').value) || 0;
+      const seconds = parseInt(document.getElementById('time-edit-seconds').value) || 0;
+      
+      if (minutes < 0 || minutes > 120) {
+        showToast('⚠️ Minutos devem estar entre 0 e 120', 'error');
+        return;
+      }
+      
+      if (seconds < 0 || seconds > 59) {
+        showToast('⚠️ Segundos devem estar entre 0 e 59', 'error');
+        return;
+      }
+      
+      if (minutes === 0 && seconds === 0) {
+        showToast('⚠️ Defina um tempo maior que zero', 'error');
+        return;
+      }
+      
+      pomodoroSeconds = (minutes * 60) + seconds;
+      updatePomodoroDisplay();
+      
+      showToast(`✅ Tempo ajustado para ${minutes}:${String(seconds).padStart(2, '0')}`, 'success');
+      closeTimeEditModal();
+    }
+
+    async function toggleStudyDay(dateStr) {
+      const existingStudy = allData.find(d => 
+        d.type === 'study_marker' && 
+        d.study_date === dateStr && 
+        d.module === currentModule
+      );
+
+      if (existingStudy) {
+        showLoading(true);
+        const result = await window.dataSdk.delete(existingStudy);
+        showLoading(false);
+        
+        if (result.isOk) {
+          showToast('❌ Marcação removida', 'info');
+        } else {
+          showToast('❌ Erro ao remover marcação', 'error');
+        }
+      } else {
+        if (allData.length >= 999) {
+          showToast('⚠️ Limite de 999 registros atingido', 'error');
+          return;
+        }
+
+        showLoading(true);
+        const result = await window.dataSdk.create({
+          type: 'study_marker',
+          study_date: dateStr,
+          module: currentModule,
+          created_at: new Date().toISOString()
+        });
+        showLoading(false);
+
+        if (result.isOk) {
+          const formattedDate = new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+          showToast(`✅ ${formattedDate} marcado como estudado!`, 'success');
+        } else {
+          showToast('❌ Erro ao marcar dia', 'error');
+        }
+      }
+    }
+
+    async function toggleStudyToday() {
+      const today = new Date().toISOString().split('T')[0];
+      const existingStudy = allData.find(d => 
+        d.type === 'study_marker' && 
+        d.study_date === today && 
+        d.module === currentModule
+      );
+
+      if (existingStudy) {
+        showLoading(true);
+        const result = await window.dataSdk.delete(existingStudy);
+        showLoading(false);
+        
+        if (result.isOk) {
+          showToast('❌ Marcação de hoje removida', 'info');
+        } else {
+          showToast('❌ Erro ao remover marcação', 'error');
+        }
+      } else {
+        if (allData.length >= 999) {
+          showToast('⚠️ Limite de 999 registros atingido', 'error');
+          return;
+        }
+
+        showLoading(true);
+        const result = await window.dataSdk.create({
+          type: 'study_marker',
+          study_date: today,
+          module: currentModule,
+          created_at: new Date().toISOString()
+        });
+        showLoading(false);
+
+        if (result.isOk) {
+          showToast('✅ Dia de hoje marcado como estudado!', 'success');
+        } else {
+          showToast('❌ Erro ao marcar dia', 'error');
+        }
+      }
+    }
+
+    async function savePomodoroSession() {
+      if (allData.length >= 999) {
+        showToast('⚠️ Limite de registros atingido', 'error');
+        return;
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      
+      const result = await window.dataSdk.create({
+        type: 'pomodoro_session',
+        session_date: today,
+        cycles_completed: 1,
+        focus_time: parseInt(document.getElementById('pomodoro-focus-duration').value) || 25,
+        break_time: 0,
+        total_time: parseInt(document.getElementById('pomodoro-focus-duration').value) || 25,
+        created_at: new Date().toISOString()
+      });
+
+      if (!result.isOk) {
+        console.log('Failed to save pomodoro session');
+      }
+    }
+
+    function openDisciplineModal() {
+      document.getElementById('discipline-name').value = '';
+      selectedColor = '#1e3a8a';
+      updateColorSelection();
+      document.getElementById('discipline-modal').classList.remove('hidden');
+      document.getElementById('discipline-modal').classList.add('flex');
+    }
+
+    function closeDisciplineModal() {
+      document.getElementById('discipline-modal').classList.add('hidden');
+      document.getElementById('discipline-modal').classList.remove('flex');
+    }
+
+    function selectColor(color) {
+      selectedColor = color;
+      updateColorSelection();
+    }
+
+    function updateColorSelection() {
+      document.querySelectorAll('.color-btn').forEach(btn => {
+        if (btn.dataset.color === selectedColor) {
+          btn.classList.add('ring-4', 'ring-blue-900', 'scale-110');
+        } else {
+          btn.classList.remove('ring-4', 'ring-blue-900', 'scale-110');
+        }
+      });
+    }
+
+    async function saveDiscipline() {
+      const name = document.getElementById('discipline-name').value.trim();
+      const copyToOther = document.getElementById('copy-to-other-mission').checked;
+      
+      if (!name) {
+        showToast('⚠️ Digite o nome da disciplina', 'error');
+        return;
+      }
+
+      const otherMissions = allData.filter(d => d.type === 'mission' && d.module_id !== 'pomodoro');
+      const recordsNeeded = copyToOther ? otherMissions.length : 1;
+      
+      if (allData.length + recordsNeeded > 999) {
+        showToast('⚠️ Limite de 999 registros atingido', 'error');
+        return;
+      }
+
+      showLoading(true);
+      
+      if (copyToOther) {
+        // Criar em todas as missões
+        for (const mission of otherMissions) {
+          await window.dataSdk.create({
+            type: 'discipline',
+            name: name,
+            color: selectedColor,
+            module: mission.module_id,
+            created_at: new Date().toISOString()
+          });
+        }
+        showToast(`✅ Disciplina criada em todas as missões!`, 'success');
+      } else {
+        // Criar apenas na missão atual
+        const result = await window.dataSdk.create({
+          type: 'discipline',
+          name: name,
+          color: selectedColor,
+          module: currentModule,
+          created_at: new Date().toISOString()
+        });
+        
+        if (result.isOk) {
+          showToast('✅ Disciplina criada com sucesso!', 'success');
+        } else {
+          showToast('❌ Erro ao criar disciplina', 'error');
+        }
+      }
+      
+      showLoading(false);
+      closeDisciplineModal();
+    }
+
+    function toggleContentQuestionsFields() {
+      const checked = document.getElementById('content-method-quest').checked;
+      const fields = document.getElementById('content-questions-fields');
+      
+      if (checked) {
+        fields.classList.remove('hidden');
+      } else {
+        fields.classList.add('hidden');
+      }
+      updateContentMethodCheckboxes();
+    }
+
+    function updateContentMethodCheckboxes() {
+      ['aula', 'pdf', 'lei', 'quest'].forEach(method => {
+        const checkbox = document.getElementById(`content-method-${method}`);
+        const label = document.getElementById(`content-method-${method}-label`);
+        
+        if (checkbox && label) {
+          if (checkbox.checked) {
+            label.classList.add('checked');
+          } else {
+            label.classList.remove('checked');
+          }
+        }
+      });
+    }
+
+    function openContentModalForDiscipline(disciplineId) {
+      currentDisciplineId = disciplineId;
+      document.getElementById('content-name').value = '';
+      document.getElementById('content-date').value = '';
+      
+      // Reset métodos
+      document.getElementById('content-method-aula').checked = false;
+      document.getElementById('content-method-pdf').checked = false;
+      document.getElementById('content-method-lei').checked = false;
+      document.getElementById('content-method-quest').checked = false;
+      document.getElementById('content-questions-total').value = '0';
+      document.getElementById('content-questions-correct').value = '0';
+      document.getElementById('content-questions-fields').classList.add('hidden');
+      
+      updateContentMethodCheckboxes();
+      
+      // Adicionar listeners aos checkboxes
+      ['aula', 'pdf', 'lei', 'quest'].forEach(method => {
+        const checkbox = document.getElementById(`content-method-${method}`);
+        if (checkbox) {
+          checkbox.removeEventListener('change', updateContentMethodCheckboxes);
+          checkbox.addEventListener('change', updateContentMethodCheckboxes);
+        }
+      });
+      
+      document.getElementById('content-modal').classList.remove('hidden');
+      document.getElementById('content-modal').classList.add('flex');
+    }
+
+    function closeContentModal() {
+      document.getElementById('content-modal').classList.add('hidden');
+      document.getElementById('content-modal').classList.remove('flex');
+      currentDisciplineId = null;
+    }
+
+    async function saveContent() {
+      const name = document.getElementById('content-name').value.trim();
+      const date = document.getElementById('content-date').value;
+
+      if (!name) {
+        showToast('⚠️ Digite o nome do conteúdo', 'error');
+        return;
+      }
+
+      if (!currentDisciplineId) {
+        showToast('⚠️ Erro: disciplina não identificada', 'error');
+        return;
+      }
+
+      if (allData.length >= 999) {
+        showToast('⚠️ Limite de 999 registros atingido', 'error');
+        return;
+      }
+
+      // Pegar métodos de estudo
+      const aula = document.getElementById('content-method-aula').checked;
+      const pdf = document.getElementById('content-method-pdf').checked;
+      const lei = document.getElementById('content-method-lei').checked;
+      const hasQuestions = document.getElementById('content-method-quest').checked;
+      const questions = hasQuestions ? parseInt(document.getElementById('content-questions-total').value) || 0 : 0;
+      const correct = hasQuestions ? parseInt(document.getElementById('content-questions-correct').value) || 0 : 0;
+
+      showLoading(true);
+      const result = await window.dataSdk.create({
+        type: 'content',
+        content: name,
+        date: date,
+        discipline_id: currentDisciplineId,
+        week_number: currentWeek,
+        module: currentModule,
+        study_date: date,
+        study_aula: aula,
+        study_pdf: pdf,
+        study_lei: lei,
+        study_done: aula || pdf || lei || hasQuestions,
+        study_questions: questions,
+        study_correct: correct,
+        feynman_notes: '',
+        rev7_done: false,
+        rev7_date: '',
+        rev7_questions: 0,
+        rev7_correct: 0,
+        rev15_done: false,
+        rev15_date: '',
+        rev15_questions: 0,
+        rev15_correct: 0,
+        rev30_done: false,
+        rev30_date: '',
+        rev30_questions: 0,
+        rev30_correct: 0,
+        created_at: new Date().toISOString()
+      });
+      showLoading(false);
+
+      if (result.isOk) {
+        showToast('✅ Conteúdo adicionado com sucesso!', 'success');
+        closeContentModal();
+      } else {
+        showToast('❌ Erro ao adicionar conteúdo', 'error');
+      }
+    }
+
+    function openMethodModal(contentId) {
+      currentMethodContentId = contentId;
+      const content = allData.find(c => c.__backendId === contentId);
+      
+      if (!content) return;
+      
+      document.getElementById('method-aula').checked = content.study_aula || false;
+      document.getElementById('method-pdf').checked = content.study_pdf || false;
+      document.getElementById('method-lei').checked = content.study_lei || false;
+      document.getElementById('method-quest').checked = (content.study_questions || 0) > 0;
+      document.getElementById('method-questions-total').value = content.study_questions || 0;
+      document.getElementById('method-questions-correct').value = content.study_correct || 0;
+      
+      updateMethodCheckboxes();
+      toggleQuestionsFields();
+      
+      document.getElementById('method-modal').classList.remove('hidden');
+      document.getElementById('method-modal').classList.add('flex');
+    }
+
+    function closeMethodModal() {
+      document.getElementById('method-modal').classList.add('hidden');
+      document.getElementById('method-modal').classList.remove('flex');
+      currentMethodContentId = null;
+    }
+
+    function toggleQuestionsFields() {
+      const checked = document.getElementById('method-quest').checked;
+      const fields = document.getElementById('questions-fields');
+      
+      if (checked) {
+        fields.classList.remove('hidden');
+      } else {
+        fields.classList.add('hidden');
+      }
+    }
+
+    function updateMethodCheckboxes() {
+      ['aula', 'pdf', 'lei', 'quest'].forEach(method => {
+        const checkbox = document.getElementById(`method-${method}`);
+        const label = document.getElementById(`method-${method}-label`);
+        
+        if (checkbox && label) {
+          if (checkbox.checked) {
+            label.classList.add('checked');
+          } else {
+            label.classList.remove('checked');
+          }
+        }
+      });
+      
+      document.querySelectorAll('.method-checkbox input[type="checkbox"]').forEach(cb => {
+        cb.removeEventListener('change', updateMethodCheckboxes);
+        cb.addEventListener('change', function() {
+          updateMethodCheckboxes();
+        });
+      });
+    }
+
+    async function saveMethod() {
+      if (!currentMethodContentId) return;
+      
+      const content = allData.find(c => c.__backendId === currentMethodContentId);
+      if (!content) return;
+      
+      const aula = document.getElementById('method-aula').checked;
+      const pdf = document.getElementById('method-pdf').checked;
+      const lei = document.getElementById('method-lei').checked;
+      const hasQuestions = document.getElementById('method-quest').checked;
+      const questions = hasQuestions ? parseInt(document.getElementById('method-questions-total').value) || 0 : 0;
+      const correct = hasQuestions ? parseInt(document.getElementById('method-questions-correct').value) || 0 : 0;
+      
+      showLoading(true);
+      const result = await window.dataSdk.update({
+        ...content,
+        study_aula: aula,
+        study_pdf: pdf,
+        study_lei: lei,
+        study_questions: questions,
+        study_correct: correct,
+        study_done: aula || pdf || lei || hasQuestions
+      });
+      showLoading(false);
+      
+      if (result.isOk) {
+        showToast('✅ Métodos atualizados!', 'success');
+        closeMethodModal();
+      } else {
+        showToast('❌ Erro ao atualizar', 'error');
+      }
+    }
+
+    async function updateContentField(id, field, value) {
+      const content = allData.find(c => c.__backendId === id);
+      if (!content) return;
+
+      let parsedValue = value;
+      if (['study_questions', 'study_correct'].includes(field)) {
+        parsedValue = parseInt(value) || 0;
+      }
+
+      const result = await window.dataSdk.update({ ...content, [field]: parsedValue });
+      if (!result.isOk) {
+        showToast('❌ Erro ao atualizar', 'error');
+      }
+    }
+
+    async function deleteContent(id) {
+      const content = allData.find(c => c.__backendId === id);
+      if (!content) return;
+
+      showLoading(true);
+      const result = await window.dataSdk.delete(content);
+      showLoading(false);
+
+      if (result.isOk) {
+        showToast('✅ Conteúdo excluído', 'success');
+      } else {
+        showToast('❌ Erro ao excluir', 'error');
+      }
+    }
+
+    async function deleteDiscipline(id) {
+      const discipline = allData.find(d => d.__backendId === id);
+      if (!discipline) return;
+
+      const contents = allData.filter(c => c.type === 'content' && c.discipline_id === id);
+      
+      showLoading(true);
+      for (const content of contents) {
+        await window.dataSdk.delete(content);
+      }
+      
+      const result = await window.dataSdk.delete(discipline);
+      showLoading(false);
+
+      if (result.isOk) {
+        showToast('✅ Disciplina excluída', 'success');
+      } else {
+        showToast('❌ Erro ao excluir', 'error');
+      }
+    }
+
+    function showLoading(show) {
+      isLoading = show;
+      const overlay = document.getElementById('loading-overlay');
+      if (show) {
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+      } else {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+      }
+    }
+
+    function openHeaderEditModal() {
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      document.getElementById('header-title-input').value = config.mission_title || defaultConfig.mission_title;
+      document.getElementById('header-motto-input').value = config.motto || defaultConfig.motto;
+      
+      document.getElementById('header-edit-modal').classList.remove('hidden');
+      document.getElementById('header-edit-modal').classList.add('flex');
+    }
+
+    function closeHeaderEditModal() {
+      document.getElementById('header-edit-modal').classList.add('hidden');
+      document.getElementById('header-edit-modal').classList.remove('flex');
+    }
+
+    async function saveHeaderEdit() {
+      const newTitle = document.getElementById('header-title-input').value.trim();
+      const newMotto = document.getElementById('header-motto-input').value.trim();
+      
+      if (!newTitle) {
+        showToast('⚠️ Digite um título', 'error');
+        return;
+      }
+      
+      if (window.elementSdk) {
+        await window.elementSdk.setConfig({
+          mission_title: newTitle,
+          motto: newMotto
+        });
+      }
+      
+      document.getElementById('mission-title').textContent = newTitle;
+      document.getElementById('mission-motto').textContent = '🎯 ' + newMotto;
+      
+      showToast('✅ Cabeçalho atualizado!', 'success');
+      closeHeaderEditModal();
+    }
+
+    function showToast(message, type = 'info', duration = 4000) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      const colors = {
+        success: 'bg-green-600',
+        'bg-red-600',
+        info: 'bg-blue-900'
+      };
+
+      toast.className = `${colors[type]} px-6 py-4 rounded-xl shadow-xl text-white font-bold scale-in`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9bfbaecd258c0b0d',t:'MTc2ODcxNDA0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
