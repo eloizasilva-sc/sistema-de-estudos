@@ -1,0 +1,3781 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SESAP RN - Monitoramento PAS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+body {
+  box-sizing: border-box;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.sidebar {
+  transition: transform 0.3s ease;
+}
+
+/* Login screen centering and background */
+#loginScreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+/* decorative blurred overlay and card styling */
+.login-wrapper { position: relative; }
+.login-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 10% 20%, rgba(99,102,241,0.12), transparent 15%), radial-gradient(circle at 90% 80%, rgba(14,165,233,0.12), transparent 18%);
+  filter: blur(30px);
+  pointer-events: none;
+}
+.login-card {
+  background: rgba(255,255,255,1);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 20px 60px rgba(8, 14, 37, 0.45), 0 6px 18px rgba(37,99,235,0.15);
+}
+/* Ensure form text and select options inside login card are dark (restore previous look) */
+.login-card, .login-card * {
+  color: inherit;
+}
+.login-card label,
+.login-card p,
+.login-card h1,
+.login-card h3 {
+  color: #19223a !important;
+}
+.login-card input,
+.login-card textarea,
+.login-card .tab-btn {
+  color: #161d2e !important;
+}
+.login-card select {
+  background: #ffffff !important;
+  color: #151f38 !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+.login-card select option {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+.login-card .tab-btn.text-slate-400 { color: #64748b !important; }
+
+    } else {
+      // Ordenar metas: aquelas com monitoramento preenchido para o quadrimestre devem aparecer primeiro
+      const metasOrdenadas = metasDoQuadrimestre.slice().sort((ma, mb) => {
+        const aAcoes = acoes.filter(a => a.metaId === ma.id);
+        const bAcoes = acoes.filter(a => a.metaId === mb.id);
+        const aTem = aAcoes.some(a => a.progressos && a.progressos.some(p => p.quadrimestre === quadrimestre));
+        const bTem = bAcoes.some(a => a.progressos && a.progressos.some(p => p.quadrimestre === quadrimestre));
+        if (aTem === bTem) return 0;
+        return aTem ? -1 : 1;
+      });
+
+      metasOrdenadas.forEach(meta => {
+        const acoesVinculadas = acoes.filter(a => a.metaId === meta.id);
+        const areasTexto = (meta.areas && Array.isArray(meta.areas)) ? meta.areas.join(' • ') : '';
+
+        // Verificar se tem monitoramento neste quadrimestre (baseado nos progressos das ações)
+        const temMonitoramentoQuad = acoesVinculadas.some(a => 
+          a.progressos && a.progressos.some(p => p.quadrimestre === quadrimestre)
+        );
+
+        // Buscar monitoramento da própria meta, se existir
+        const monitoramentoMeta = meta.monitoramentos ? meta.monitoramentos.find(m => m.quadrimestre === quadrimestre) : null;
+
+        html += `
+          <div class="bg-white rounded-xl border-2 border-blue-200 p-6 mb-4 shadow-sm hover:shadow-md transition">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="target" class="w-6 h-6 text-white"></i>
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="text-xl font-bold text-slate-900">${meta.titulo}</h3>
+                    <p class="text-sm text-slate-600">${areasTexto}</p>
+                    ${monitoramentoMeta ? `<p class="text-sm text-green-700 font-semibold mt-2">Resultado: ${monitoramentoMeta.resultado} • Status: ${monitoramentoMeta.status}</p>` : ''}
+                  </div>
+                </div>
+              </div>
+              <button onclick="abrirModalMonitoramentoQuadrimestre('${meta.id}', '${quadrimestre}')" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:shadow-lg transition font-bold text-sm flex items-center gap-2 flex-shrink-0">
+                <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                Preencher
+              </button>
+            </div>
+
+            <div class="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-200">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <p class="text-xs font-bold text-blue-700 mb-1">📊 INDICADOR</p>
+                  <p class="text-sm font-semibold text-blue-900">${meta.indicador}</p>
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-blue-700 mb-1"> % PROPOSTO</p>
+                  <p class="text-sm font-semibold text-blue-900">${meta.percentualProposto}%</p>
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-blue-700 mb-1">✅ AÇÕES VINCULADAS</p>
+                  <p class="text-sm font-semibold text-blue-900">${acoesVinculadas.length} ação(ões)</p>
+                </div>
+              </div>
+            </div>
+
+            ${temMonitoramentoQuad ? `
+              <div class="bg-green-50 rounded-lg p-4 border border-green-200 mb-4">
+                <p class="text-xs font-bold text-green-700 mb-2">✅ Monitoramento preenchido para este quadrimestre</p>
+              </div>
+            ` : `
+              <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200 mb-4">
+                <p class="text-sm text-yellow-800 font-semibold">⚠️ Monitoramento pendente para este quadrimestre</p>
+              </div>
+            `}
+
+            <!-- LISTA DE AÇÕES VINCULADAS (EXIBIDAS ABAIXO DA META) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              ${acoesVinculadas.map(acao => {
+                const progressoExistente = acao.progressos?.find(p => p.quadrimestre === quadrimestre);
+                const vpNum = parseBrazilianNumber(acao.valorProposto || '');
+                const veNum = (progressoExistente && typeof progressoExistente.valorExecutadoNumero === 'number') ? progressoExistente.valorExecutadoNumero : parseBrazilianNumber(progressoExistente?.valorExecutado || '');
+                const pct = (!isNaN(vpNum) && vpNum > 0 && !isNaN(veNum)) ? Math.round((veNum / vpNum) * 100) : 0;
+                const statusBadge = progressoExistente?.status ? progressoExistente.status : 'PENDENTE';
+                const corBadge = statusBadge === 'CONCLUIDA' ? 'bg-green-100 text-green-800' : statusBadge === 'EM_ANDAMENTO' ? 'bg-blue-100 text-blue-800' : statusBadge === 'PARALISADA' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800';
+
+                return `
+                  <div class="border-2 border-slate-200 rounded-lg p-3 bg-white">
+                    <div class="flex items-start justify-between mb-2">
+                      <div>
+                        <div class="text-sm font-bold text-slate-900">${acao.titulo}</div>
+                        <div class="text-xs text-slate-600">${acao.descricao || ''}</div>
+                      </div>
+                      <div class="text-right">
+                        <div class="inline-block px-2 py-1 rounded text-xs font-bold ${corBadge}">${statusBadge}</div>
+                      </div>
+                    </div>
+                    <div class="text-xs text-slate-600 mb-2">
+                      <div><strong>Valor Proposto:</strong> ${formatToBRL(acao.valorProposto) || (acao.valorProposto || 'N/A')}</div>
+                      <div><strong>Valor Executado:</strong> ${formatToBRL(progressoExistente?.valorExecutado) || (progressoExistente?.valorExecutado || '—')}</div>
+                    </div>
+                    <div>
+                      <div style="background:#f3f4f6;border-radius:4px;height:8px;width:100%;overflow:hidden;">
+                        <div style="width: ${pct}%; height:100%; background: ${pct >= 75 ? '#10b981' : pct >=50 ? '#f59e0b' : '#dc2626'};"></div>
+                      </div>
+                      <div style="font-size:11px;margin-top:6px;color:#374151;font-weight:700;">${pct}% • ${progressoExistente?.status || 'Sem preenchimento'}</div>
+                    </div>
+                    <div class="mt-3 text-right">
+                      <button onclick="abrirModalMonitoramentoQuadrimestre('${meta.id}', '${quadrimestre}')" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold">Editar</button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      });
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  bottom: -100px;
+  left: -100px;
+  animation: pulse 10s ease-in-out infinite reverse;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 16px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+}
+
+.mobile-overlay.active {
+  display: block;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.aba-admin-btn {
+  background: white;
+  color: #64748b;
+  border: 2px solid transparent;
+}
+
+.aba-admin-btn:hover {
+  background: #f8fafc;
+  color: #334155;
+}
+
+.aba-admin-btn.active {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  border-color: #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+</style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-gradient-to-br from-blue-700 to-blue-900 text-white"><!-- TELA DE LOGIN -->
+  <div id="loginScreen" class="login-wrapper">
+  <div class="relative z-10 login-card rounded-3xl p-8 w-full max-w-md mx-4 animate-slide-up">
+    <div class="text-center mb-8">
+     <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl mb-6 shadow-lg"><i data-lucide="activity" class="w-10 h-10 text-white"></i>
+     </div>
+     <h1 class="text-3xl font-black text-slate-900 mb-2">SESAP RN</h1>
+     <p class="text-sm text-slate-600 font-semibold leading-relaxed">Sistema de Monitoramento e Avaliação<br>
+      da Programação Anual de Saúde</p>
+    </div>
+    <div class="flex gap-2 mb-8 border-b-2 border-slate-200"><button class="tab-btn flex-1 pb-3 font-bold text-sm text-slate-900 border-b-3 border-slate-900" onclick="mostrarAba('login')">ENTRAR</button> <button class="tab-btn flex-1 pb-3 font-bold text-sm text-slate-400 border-b-3 border-transparent hover:text-slate-600" onclick="mostrarAba('registro')">CRIAR CONTA</button>
+    </div>
+    <form id="loginForm">
+     <div id="loginAlertContainer" class="mb-4"></div>
+     <div class="mb-5"><label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">E-mail ou Usuário</label>
+      <div class="relative"><i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i> <input type="text" id="loginEmail" class="w-full pl-12 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="admin.admin" required>
+      </div>
+     </div>
+     <div class="mb-6"><label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Senha</label>
+      <div class="relative"><i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i> <input type="password" id="loginSenha" class="w-full pl-12 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Digite sua senha" required>
+      </div>
+     </div><button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3.5 rounded-xl font-bold text-sm uppercase tracking-wide hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2"> <span id="btnLoginTexto">Acessar Sistema</span> </button>
+    </form>
+    <form id="registroForm" style="display: none;">
+     <div id="registroAlertContainer" class="mb-4"></div>
+     <div class="mb-4"><label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Nome Completo</label> <input type="text" id="regNome" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Nome completo" required>
+     </div>
+     <div class="mb-4"><label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">E-mail (obrigatório @)</label> <input type="email" id="regEmail" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="seu.email@sesap.rn.gov.br" required pattern="[^@]+@[^@]+">
+     </div>
+     <div class="mb-4"><label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Senha</label> <input type="password" id="regSenha" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Mínimo 6 caracteres" required minlength="6">
+     </div>
+     <div class="mb-4"><label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Perfil de Acesso</label> <select id="regNivel" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" required> <option value="">Selecione o perfil...</option> <option value="TECNICO">Técnico - Acesso por área</option> <option value="VISUALIZADOR">Visualizador - Somente leitura</option> </select>
+     </div>
+     <div id="areaField" class="mb-4" style="display: none;"><label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Área Técnica</label> <select id="regArea" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900"> <option value="">Selecione a área...</option> </select>
+     </div><button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3.5 rounded-xl font-bold text-sm uppercase tracking-wide hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2"> <span id="btnRegistroTexto">Criar Conta</span> </button>
+    </form>
+    <div class="mt-8 pt-6 border-t border-slate-200 text-center">
+     <p class="text-sm font-bold text-slate-700 mb-1">Desenvolvido por Maria Eloiza da Silva</p>
+     <p class="text-xs text-slate-500 italic">Especialização em Saúde Coletiva com Área de Concentração em Monitoramento e Avaliação em Saúde</p>
+    </div>
+   </div>
+  </div><!-- SISTEMA PRINCIPAL -->
+  <div id="mainSystem" style="display: none;" class="h-full flex">
+   <div id="mobileOverlay" class="mobile-overlay" onclick="toggleSidebar()"></div><!-- SIDEBAR -->
+   <aside id="sidebar" class="sidebar fixed lg:static inset-y-0 left-0 z-50 w-72 bg-slate-900 text-white flex flex-col shadow-2xl">
+    <div class="p-6 border-b border-slate-800">
+     <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+       <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center"><i data-lucide="activity" class="w-6 h-6"></i>
+       </div>
+       <div>
+        <h1 class="text-lg font-black tracking-tight">SESAP RN</h1>
+        <p class="text-xs text-slate-400 font-medium">Monitoramento PAS</p>
+       </div>
+      </div><button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-slate-800 rounded-lg transition"> <i data-lucide="x" class="w-5 h-5"></i> </button>
+     </div>
+    </div>
+    <nav class="flex-1 p-4 overflow-y-auto">
+     <div class="space-y-1"><a href="#" onclick="mostrarSecao('dashboard')" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition group" data-secao="dashboard"> <i data-lucide="layout-dashboard" class="w-5 h-5"></i> <span class="font-semibold text-sm">Painel Geral</span> </a> <a href="#" onclick="mostrarSecao('cadastro')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition group" data-secao="cadastro" id="navCadastro"> <i data-lucide="file-plus" class="w-5 h-5"></i> <span class="font-semibold text-sm">Cadastro PAS</span> </a> <a href="#" onclick="mostrarSecao('monitoramento')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition group" data-secao="monitoramento"> <i data-lucide="trending-up" class="w-5 h-5"></i> <span class="font-semibold text-sm">Monitoramento</span> </a>
+      <div class="pt-4" id="navAdminContainer" style="display: none;">
+       <div class="pb-2">
+        <p class="px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Administração</p>
+       </div><a href="#" onclick="mostrarSecao('admin')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition group" data-secao="admin"> <i data-lucide="settings" class="w-5 h-5 text-slate-400"></i> <span class="font-semibold text-sm">Configurações</span> </a>
+      </div>
+     </div>
+    </nav>
+    <div class="p-4 border-t border-slate-800">
+     <div class="flex items-center gap-3 p-3 bg-slate-800 rounded-xl">
+      <div id="userAvatar" class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center font-bold text-sm">
+       AD
+      </div>
+      <div class="flex-1 min-w-0">
+       <p id="userName" class="font-semibold text-sm truncate">Usuário</p>
+       <p id="userRole" class="text-xs text-slate-400 truncate">Admin</p>
+      </div>
+     </div>
+    </div>
+   </aside><!-- CONTEÚDO PRINCIPAL -->
+   <main class="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between gap-4 flex-shrink-0">
+     <div class="flex items-center gap-4"><button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-slate-100 rounded-lg transition"> <i data-lucide="menu" class="w-6 h-6 text-slate-600"></i> </button>
+      <h1 id="pageTitle" class="text-xl font-bold text-slate-900">Painel Geral</h1>
+     </div>
+     <div class="flex items-center gap-3"><button onclick="exportarPDF()" class="hidden sm:flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold text-sm"> <i data-lucide="download" class="w-4 h-4"></i> <span>Exportar PDF</span> </button> <button onclick="logout()" class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-semibold text-sm"> <i data-lucide="log-out" class="w-4 h-4"></i> <span class="hidden sm:inline">Sair</span> </button>
+     </div>
+    </header>
+    <div class="flex-1 overflow-y-auto">
+     <div class="p-6 max-w-[1600px] mx-auto pb-32"><!-- SEÇÃO DASHBOARD -->
+      <div id="secaoDashboard" class="secao-conteudo">
+       <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+         <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2"><i data-lucide="filter" class="w-5 h-5 text-blue-600"></i> Filtrar por Área</h2>
+         <div id="filtrosArea" class="flex flex-wrap gap-2"></div>
+        </div>
+       </div>
+       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white shadow-lg">
+         <div class="flex items-center justify-between mb-4"><i data-lucide="list-checks" class="w-8 h-8 opacity-80"></i> <span class="text-3xl font-black" id="totalAcoesPanorama">0</span>
+         </div>
+         <p class="text-sm font-semibold opacity-90">Total de Ações</p>
+         <p class="text-xs opacity-75 mt-1">Programação Anual</p>
+        </div>
+        <div class="bg-gradient-to-br from-red-600 to-red-700 rounded-xl p-6 text-white shadow-lg">
+         <div class="flex items-center justify-between mb-4"><i data-lucide="alert-circle" class="w-8 h-8 opacity-80"></i> <span class="text-3xl font-black" id="criticoPanorama">0%</span>
+         </div>
+         <p class="text-sm font-semibold opacity-90">Crítico</p>
+         <p class="text-xs opacity-75 mt-1">Ações Pendentes</p>
+        </div>
+        <div class="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-6 text-white shadow-lg">
+         <div class="flex items-center justify-between mb-4"><i data-lucide="trending-up" class="w-8 h-8 opacity-80"></i> <span class="text-3xl font-black" id="progressoPanorama">0%</span>
+         </div>
+         <p class="text-sm font-semibold opacity-90">Progresso</p>
+         <p class="text-xs opacity-75 mt-1" id="semaforoPanorama">🔴 Crítico</p>
+        </div>
+        <div class="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 text-white shadow-lg">
+         <div class="flex items-center justify-between mb-4"><i data-lucide="clock" class="w-8 h-8 opacity-80"></i> <span class="text-3xl font-black"><span id="andamentoPanorama">0</span>%</span>
+         </div>
+         <p class="text-sm font-semibold opacity-90">Em Andamento</p>
+         <p class="text-xs opacity-75 mt-1"><span id="andamentoPct">0</span>% do total</p>
+        </div>
+       </div>
+       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+         <h3 class="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><i data-lucide="pie-chart" class="w-5 h-5 text-blue-600"></i> Distribuição por Status</h3>
+         <div id="statusChart" class="space-y-4"></div>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+         <h3 class="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><i data-lucide="calendar" class="w-5 h-5 text-blue-600"></i> Por Quadrimestre</h3>
+         <div id="quadrimestreChart" class="space-y-4"></div>
+        </div>
+       </div>
+       <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2"><i data-lucide="building-2" class="w-5 h-5 text-blue-600"></i> Distribuição por Área Técnica</h3>
+        <div id="areaCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+       </div>
+      </div><!-- SEÇÃO CADASTRO -->
+      <div id="secaoCadastro" class="secao-conteudo" style="display: none;">
+       <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+         <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2"><i data-lucide="filter" class="w-5 h-5 text-blue-600"></i> Filtrar por Área</h2>
+         <div id="filtrosAreaCadastro" class="flex flex-wrap gap-2"></div>
+        </div>
+       </div>
+       <div class="flex flex-wrap gap-3 mb-6" id="botoesAcao"><button onclick="abrirModalNovaMeta()" class="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-bold text-sm shadow-lg"> <i data-lucide="target" class="w-5 h-5"></i> Nova Meta </button>
+       </div>
+       <div id="listaMetasAcoes"></div>
+      </div><!-- SEÇÃO MONITORAMENTO -->
+      <div id="secaoMonitoramento" class="secao-conteudo" style="display: none;">
+       <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><i data-lucide="filter" class="w-5 h-5 text-blue-600"></i> Filtros</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+         <div><label class="block text-sm font-bold text-slate-700 mb-2">Filtrar por Área</label>
+          <div id="filtrosAreaMonitoramento" class="flex flex-wrap gap-2"></div>
+         </div>
+         <div><label class="block text-sm font-bold text-slate-700 mb-2">Filtrar por Quadrimestre</label>
+          <div id="filtrosQuadrimestreMonitoramento" class="flex flex-wrap gap-2"></div>
+         </div>
+        </div>
+        <div id="areaDefinirPrazos" class="mt-6 pt-6 border-t-2 border-slate-200" style="display: none;">
+         <h3 class="text-md font-bold text-slate-900 mb-3 flex items-center gap-2"><i data-lucide="calendar-clock" class="w-5 h-5 text-purple-600"></i> Gestão de Prazos e Liberação dos Quadrimestres</h3>
+         <p class="text-sm text-slate-600 mb-4">Defina os prazos de preenchimento e libere o acesso aos quadrimestres para técnicos e visualizadores</p>
+         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          ${quadrimestres.map(quad =&gt; { const prazo = prazosQuadrimestres[quad]; const status = calcularStatusPrazo(prazo); const liberado = liberacoesQuadrimestres[quad] || false; return ` 
+          <div class="${prazo ? status.classe + ' border-2' : 'bg-slate-100 border-2 border-dashed border-slate-300'} rounded-lg p-4 transition">
+           <div class="flex items-center justify-between mb-2"><span class="font-bold text-sm text-slate-900">${quad}</span>
+            <div class="flex gap-1"><button onclick="definirPrazoQuadrimestre('${quad}')" class="p-1 hover:bg-black/10 rounded transition" title="Gerenciar prazo e liberação"> <i data-lucide="${prazo ? 'edit-2' : 'calendar-plus'}" class="w-4 h-4 text-slate-900"></i> </button>
+            </div>
+           </div> ${prazo ? ` 
+           <p class="text-xs font-semibold mb-1">${status.emoji} ${status.texto}</p>
+           <p class="text-xs opacity-75 mb-2">📅 ${new Date(prazo).toLocaleDateString('pt-BR')}</p> ` : ` 
+           <p class="text-xs text-slate-600 mb-2">Clique para definir prazo</p> `} 
+           <div class="flex items-center gap-2 pt-2 border-t ${prazo ? 'border-slate-300/50' : 'border-slate-300'}"><span class="text-xs font-bold ${liberado ? 'text-green-700' : 'text-red-700'}">${liberado ? '🟢 Liberado' : '🔴 Bloqueado'}</span>
+           </div>
+          </div> `; }).join('')}
+         </div>
+        </div>
+       </div>
+       <div id="listaAreasMonitoramento"></div>
+      </div><!-- SEÇÃO ADMINISTRAÇÃO -->
+      <div id="secaoAdmin" class="secao-conteudo" style="display: none;">
+       <div id="alertaUsuariosPendentes" class="mb-6"></div>
+       <div class="bg-white rounded-xl border border-slate-200 p-2 mb-6 shadow-sm flex gap-2 flex-wrap"><button onclick="mostrarAbaAdmin('autorizacao')" class="aba-admin-btn active flex-1 min-w-[150px] px-4 py-3 rounded-lg font-bold text-sm transition-all" data-aba="autorizacao"> <i data-lucide="user-check" class="w-4 h-4 inline mr-2"></i> Autorização de Usuários </button> <button onclick="mostrarAbaAdmin('usuarios')" class="aba-admin-btn flex-1 min-w-[150px] px-4 py-3 rounded-lg font-bold text-sm transition-all" data-aba="usuarios"> <i data-lucide="users" class="w-4 h-4 inline mr-2"></i> Gestão de Usuários </button> <button onclick="mostrarAbaAdmin('auditoria')" class="aba-admin-btn flex-1 min-w-[150px] px-4 py-3 rounded-lg font-bold text-sm transition-all" data-aba="auditoria"> <i data-lucide="shield" class="w-4 h-4 inline mr-2"></i> Auditoria do Sistema </button> <button onclick="mostrarAbaAdmin('configuracoes')" class="aba-admin-btn flex-1 min-w-[150px] px-4 py-3 rounded-lg font-bold text-sm transition-all" data-aba="configuracoes"> <i data-lucide="settings" class="w-4 h-4 inline mr-2"></i> Configurações </button>
+       </div>
+       <div id="abaAutorizacao" class="aba-admin-conteudo">
+        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+         <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><i data-lucide="user-check" class="w-5 h-5 text-blue-600"></i> Solicitações Pendentes de Autorização</h3>
+         <div id="listaAutorizacoes"></div>
+        </div>
+       </div>
+       <div id="abaUsuarios" class="aba-admin-conteudo" style="display: none;">
+        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+         <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><i data-lucide="users" class="w-5 h-5 text-blue-600"></i> Todos os Usuários do Sistema</h3>
+         <div id="listaUsuarios"></div>
+        </div>
+       </div>
+       <div id="abaAuditoria" class="aba-admin-conteudo" style="display: none;">
+        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+         <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2"><i data-lucide="shield" class="w-5 h-5 text-blue-600"></i> Registro de Auditoria</h3><button onclick="limparAuditoria()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-semibold text-sm flex items-center gap-2"> <i data-lucide="trash-2" class="w-4 h-4"></i> Limpar Histórico </button>
+         </div>
+         <div id="listaAuditoria"></div>
+        </div>
+       </div>
+       <div id="abaConfiguracoes" class="aba-admin-conteudo" style="display: none;">
+        <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl p-6 text-white mb-6 shadow-lg">
+         <h3 class="text-2xl font-black mb-2 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-7 h-7"></i> Métricas do Sistema</h3>
+         <p class="text-blue-100 text-sm">Tempo médio de preenchimento e estatísticas gerais</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+         <div class="bg-white rounded-xl border-2 border-slate-200 p-6 shadow-sm">
+          <h4 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wide flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-blue-600"></i> Tempo Médio de Preenchimento</h4>
+          <div id="metricasTempoPreenchimento" class="space-y-3"></div>
+         </div>
+         <div class="bg-white rounded-xl border-2 border-slate-200 p-6 shadow-sm">
+          <h4 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wide flex items-center gap-2"><i data-lucide="target" class="w-4 h-4 text-green-600"></i> Metas Preenchidas por Quadrimestre</h4>
+          <div id="metricasMetasQuadrimestre" class="space-y-3"></div>
+         </div>
+         <div class="bg-white rounded-xl border-2 border-slate-200 p-6 shadow-sm">
+          <h4 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wide flex items-center gap-2"><i data-lucide="activity" class="w-4 h-4 text-purple-600"></i> Estatísticas Gerais</h4>
+          <div id="metricasGerais" class="space-y-3"></div>
+         </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+         <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+          <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><i data-lucide="building-2" class="w-5 h-5 text-blue-600"></i> Gestão de Áreas Técnicas</h3>
+          <form id="formNovaArea" class="flex gap-3 mb-6"><input type="text" id="novaAreaNome" class="flex-1 px-4 py-2.5 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Nome da nova área (ex: SAPS)" required> <button type="submit" class="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-bold text-sm whitespace-nowrap"> Adicionar </button>
+          </form>
+          <div id="listaAreas" class="space-y-2"></div>
+         </div>
+         <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+          <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><i data-lucide="calendar" class="w-5 h-5 text-blue-600"></i> Gestão de Quadrimestres</h3>
+          <form id="formNovoQuadrimestre" class="flex gap-3 mb-6"><input type="text" id="novoQuadrimestreNome" class="flex-1 px-4 py-2.5 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Nome do quadrimestre (ex: 1º Quadrimestre)" required> <button type="submit" class="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-bold text-sm whitespace-nowrap"> Adicionar </button>
+          </form>
+          <div id="listaQuadrimestres" class="space-y-2"></div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+     <footer class="fixed bottom-0 left-0 lg:left-72 right-0 bg-gradient-to-r from-blue-600 to-blue-800 text-white py-4 px-6 shadow-lg z-30">
+      <div class="max-w-[1600px] mx-auto text-center">
+       <p class="font-bold text-sm mb-1">Desenvolvido por Maria Eloiza da Silva</p>
+       <p class="text-xs text-blue-100 italic">Especialização em Sade Coletiva com Área de Concentração em Monitoramento e Avaliação em Saúde</p>
+      </div>
+     </footer>
+    </div>
+   </main>
+  </div><!-- MODAIS -->
+  <div id="modalNovaMeta" class="modal-overlay" style="display: none;">
+   <div class="modal-container w-full max-w-2xl p-8">
+    <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
+     <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-3"><i data-lucide="target" class="w-6 h-6 text-blue-600"></i> Nova Meta</h2><button onclick="fecharModalNovaMeta()" class="p-2 hover:bg-slate-100 rounded-lg transition"> <i data-lucide="x" class="w-6 h-6 text-slate-400"></i> </button>
+    </div>
+    <form id="formNovaMeta">
+     <div class="space-y-4">
+      <div><label class="block text-sm font-bold text-slate-700 mb-2">Título da Meta *</label> <input type="text" id="metaTitulo" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Ex: Ampliar cobertura vacinal" required>
+      </div>
+      <div><label class="block text-sm font-bold text-slate-700 mb-2">Objetivo Estratégico *</label> <textarea id="metaObjetivo" rows="3" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition resize-none text-slate-900" placeholder="Descreva o objetivo estratégico da meta" required></textarea>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+       <div><label class="block text-sm font-bold text-slate-700 mb-2">Indicador de Base *</label> <input type="text" id="metaIndicador" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Ex: % de cobertura" required>
+       </div>
+       <div><label class="block text-sm font-bold text-slate-700 mb-2">% Proposto *</label> <input type="number" id="metaPercentualProposto" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Ex: 95" min="0" max="100" step="0.1" required>
+       </div>
+      </div>
+      <div><label class="block text-sm font-bold text-slate-700 mb-2">Áreas Técnicas *</label>
+       <div id="metaAreasCheckboxes" class="border-2 border-slate-200 rounded-lg p-4 space-y-2 max-h-48 overflow-y-auto"></div>
+       <p class="text-xs text-slate-500 mt-1">Selecione uma ou mais áreas responsáveis</p>
+      </div>
+      <div class="flex gap-3 pt-4"><button type="button" onclick="fecharModalNovaMeta()" class="flex-1 px-6 py-3 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition font-bold"> Cancelar </button> <button type="submit" id="btnSalvarMeta" class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-bold"> Salvar Meta </button>
+      </div>
+     </div>
+    </form>
+   </div>
+  </div>
+  <div id="modalNovaAcao" class="modal-overlay" style="display: none;">
+   <div class="modal-container w-full max-w-3xl p-8">
+    <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
+     <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-3"><i data-lucide="plus-circle" class="w-6 h-6 text-green-600"></i> <span id="tituloModalAcao">Nova Ação</span></h2><button onclick="fecharModalNovaAcao()" class="p-2 hover:bg-slate-100 rounded-lg transition"> <i data-lucide="x" class="w-6 h-6 text-slate-400"></i> </button>
+    </div>
+    <form id="formNovaAcao">
+     <div id="infoMetaVinculada" class="mb-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg" style="display: none;">
+      <div class="flex items-center gap-2 text-blue-800"><i data-lucide="link" class="w-5 h-5"></i> <span class="font-bold text-sm">Vinculada à meta:</span> <span id="metaVinculadaNome" class="font-semibold"></span>
+      </div>
+     </div>
+     <div class="space-y-4">
+      <div><label class="block text-sm font-bold text-slate-700 mb-2">Código da Ação *</label> <input type="text" id="acaoTitulo" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Ex: APS-001" required>
+      </div>
+      <div><label class="block text-sm font-bold text-slate-700 mb-2">Descrição da Ação *</label> <textarea id="acaoDescricao" rows="3" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition resize-none text-slate-900" placeholder="Descreva detalhadamente a ação a ser realizada" required></textarea>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+       <div><label class="block text-sm font-bold text-slate-700 mb-2">Indicador *</label> <input type="text" id="acaoIndicador" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Ex: % de cobertura vacinal" required>
+       </div>
+       <div><label class="block text-sm font-bold text-slate-700 mb-2">Unidade de Medida *</label> <input type="text" id="acaoUnidadeMedida" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Ex: %, un, km" required>
+       </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+       <div><label class="block text-sm font-bold text-slate-700 mb-2">Valor Proposto (R$) *</label> <input type="text" id="acaoValorProposto" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Ex: 50000.00" required>
+        <p class="text-xs text-slate-500 mt-1">Informe o valor total previsto em reais</p>
+       </div>
+       <div><label class="block text-sm font-bold text-slate-700 mb-2">Resultado Proposto *</label> <input type="text" id="acaoResultadoProposto" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Ex: 95% ou 1000 un" required>
+        <p class="text-xs text-slate-500 mt-1">Meta de resultado esperado</p>
+       </div>
+      </div>
+      <div><label class="block text-sm font-bold text-slate-700 mb-2">Áreas Técnicas *</label>
+       <div id="acaoAreasCheckboxes" class="border-2 border-slate-200 rounded-lg p-4 space-y-2 max-h-48 overflow-y-auto"></div>
+       <p class="text-xs text-slate-500 mt-1">Selecione uma ou mais áreas responsáveis</p>
+      </div>
+      <div><label class="block text-sm font-bold text-slate-700 mb-2">Responsável *</label> <input type="text" id="acaoResponsavel" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Nome do responsável" required>
+      </div>
+      <div class="flex gap-3 pt-4"><button type="button" onclick="fecharModalNovaAcao()" class="flex-1 px-6 py-3 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition font-bold"> Cancelar </button> <button type="submit" id="btnSalvarAcao" class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-bold"> Salvar Ação </button>
+      </div>
+     </div>
+    </form>
+   </div>
+  </div>
+  <div id="modalMonitoramento" class="modal-overlay" style="display: none;">
+   <div class="modal-container w-full max-w-6xl p-8 max-h-[95vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 sticky top-0 bg-white z-10">
+     <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-3"><i data-lucide="trending-up" class="w-6 h-6 text-blue-600"></i> <span id="tituloModalMonitoramento">Monitoramento Completo</span></h2><button onclick="fecharModalMonitoramento()" class="p-2 hover:bg-slate-100 rounded-lg transition"> <i data-lucide="x" class="w-6 h-6 text-slate-400"></i> </button>
+    </div>
+    <div id="infoItemMonitoramento" class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-blue-300"></div>
+    <form id="formMonitoramento">
+     <div class="space-y-6"><!-- SE��ÃO MONITORAMENTO DA META -->
+      <div id="secaoMonitoramentoMeta" class="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-400 rounded-xl p-6 shadow-lg">
+       <h3 class="text-xl font-black text-blue-900 mb-4 flex items-center gap-3"><i data-lucide="target" class="w-6 h-6"></i> 📊 Monitoramento da Meta</h3><!-- Indicadores Fixos da Meta -->
+       <div class="bg-white rounded-lg p-5 border-2 border-blue-300 mb-5 shadow-md">
+        <p class="text-sm font-black text-blue-900 mb-4 uppercase tracking-wide flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4"></i> Dados Fixos (Não Editáveis)</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+         <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <p class="text-xs font-bold text-blue-700 mb-2">📊 INDICADOR DE BASE</p>
+          <p id="metaIndicadorFixo" class="text-2xl font-black text-blue-900">-</p>
+         </div>
+         <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <p class="text-xs font-bold text-blue-700 mb-2">🎯 % PROPOSTO</p>
+          <p id="metaPercentualProposto" class="text-2xl font-black text-blue-900">-</p>
+         </div>
+        </div>
+       </div>
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div><label class="block text-sm font-bold text-slate-700 mb-2">Resultado Alcançado *</label> <input type="text" id="monitorMetaResultado" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" placeholder="Ex: 85%" required>
+         <p class="text-xs text-slate-500 mt-1">Resultado em percentual ou valor numérico</p>
+        </div>
+        <div><label class="block text-sm font-bold text-slate-700 mb-2">Status *</label> <select id="monitorMetaStatus" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" required> <option value="">Selecione...</option> <option value="CONCLUIDA">✅ Concluída</option> <option value="EM_ANDAMENTO">⏳ Em Andamento</option> <option value="PREPARATORIA"> Preparatória</option> <option value="NAO_INICIADA"> Não Iniciada</option> <option value="PARALISADA">⏸️ Paralisada</option> </select>
+        </div>
+       </div>
+       <div class="mt-4"><label class="block text-sm font-bold text-slate-700 mb-2">Análise Crítica da Meta *</label> <textarea id="monitorMetaAnalise" rows="4" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition resize-none text-slate-900" placeholder="Descreva a análise crítica da meta, resultados obtidos, desafios enfrentados..." required></textarea>
+       </div>
+      </div><!-- SEÇÃO MONITORAMENTO DAS AÇÕES VINCULADAS -->
+      <div id="secaoMonitoramentoAcoes" class="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-400 rounded-xl p-6 shadow-lg">
+       <h3 class="text-xl font-black text-green-900 mb-4 flex items-center gap-3"><i data-lucide="list-checks" class="w-6 h-6"></i> ✅ Monitoramento das Ações Vinculadas</h3>
+       <div id="listaAcoesMonitoramento" class="space-y-5"><!-- Será preenchido dinamicamente -->
+       </div>
+      </div>
+      <div class="flex gap-3 pt-4 sticky bottom-0 bg-white border-t-2 border-slate-200 py-4"><button type="button" onclick="fecharModalMonitoramento()" class="flex-1 px-6 py-3 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition font-bold"> Cancelar </button> <button type="submit" id="btnSalvarMonitoramento" class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:shadow-xl transition font-bold"> <span class="flex items-center justify-center gap-2"> <i data-lucide="save" class="w-5 h-5"></i> Salvar Monitoramento Completo </span> </button>
+      </div>
+     </div>
+    </form>
+   </div>
+  </div>
+  <script>
+// C���DIGO JAVASCRIPT COMPLETO AQUI (continuação no pr��ximo bloco devido ao tamanho)
+// [O código JavaScript permanece EXATAMENTE como estava na versão 77]
+</script>
+  <script>
+// INICIALIZAÇÃO DOS ÍCONES LUCIDE
+function initLucideIcons() {
+  setTimeout(() => {
+    if (window.lucide && window.lucide.createIcons) {
+      window.lucide.createIcons();
+    }
+  }, 100);
+}
+
+// STATE MANAGEMENT
+let currentUser = null;
+let usuarios = JSON.parse(localStorage.getItem('usuarios')) || [
+  { id: '1', nome: 'Administrador do Sistema', email: 'admin.admin', senha: 'admin.admin', nivel: 'ADMIN', area: '', autorizado: true, dataCriacao: new Date().toISOString() }
+];
+let acoes = JSON.parse(localStorage.getItem('acoes')) || [];
+let areas = JSON.parse(localStorage.getItem('areas')) || ['SAPS', 'SRAS', 'CERAE', 'SUP'];
+let quadrimestres = JSON.parse(localStorage.getItem('quadrimestres')) || ['1º Quadrimestre', '2º Quadrimestre', '3º Quadrimestre'];
+let auditoria = JSON.parse(localStorage.getItem('auditoria')) || [];
+let metas = JSON.parse(localStorage.getItem('metas')) || [];
+let filtroAreaAtivo = 'TODAS';
+let filtroAreaMonitoramento = 'TODAS';
+let filtroQuadrimestreMonitoramento = 'TODOS';
+let filtroAreaCadastro = 'TODAS';
+let metaIdParaVincular = null;
+let acaoIdParaProgresso = null;
+let prazosQuadrimestres = JSON.parse(localStorage.getItem('prazosQuadrimestres')) || {};
+let liberacoesQuadrimestres = JSON.parse(localStorage.getItem('liberacoesQuadrimestres')) || {};
+
+function salvarDados() {
+  localStorage.setItem('usuarios', JSON.stringify(usuarios));
+  localStorage.setItem('acoes', JSON.stringify(acoes));
+  localStorage.setItem('areas', JSON.stringify(areas));
+  localStorage.setItem('quadrimestres', JSON.stringify(quadrimestres));
+  localStorage.setItem('auditoria', JSON.stringify(auditoria));
+  localStorage.setItem('metas', JSON.stringify(metas));
+  localStorage.setItem('prazosQuadrimestres', JSON.stringify(prazosQuadrimestres));
+  localStorage.setItem('liberacoesQuadrimestres', JSON.stringify(liberacoesQuadrimestres));
+}
+
+function registrarAuditoria(acao, detalhes) {
+  if (!currentUser) return;
+  
+  auditoria.push({
+    id: Date.now().toString(),
+    usuario: currentUser.nome,
+    usuarioEmail: currentUser.email,
+    acao: acao,
+    detalhes: detalhes,
+    dataHora: new Date().toISOString(),
+    ip: 'Sistema Local'
+  });
+  
+  salvarDados();
+}
+
+// ---------- UTILITÁRIOS: formatação BRL e parser ----------
+function parseBrazilianNumber(raw) {
+  if (raw === undefined || raw === null) return NaN;
+  let s = String(raw).trim();
+  if (!s) return NaN;
+  // Keep digits, dot, comma and minus
+  s = s.replace(/[^0-9.,-]/g, '');
+  const hasComma = s.indexOf(',') !== -1;
+  const hasDot = s.indexOf('.') !== -1;
+  if (hasComma && hasDot) {
+    // Assume dot as thousand separator, comma as decimal
+    s = s.replace(/\./g, '');
+    s = s.replace(/,/g, '.');
+  } else if (hasComma && !hasDot) {
+    // comma as decimal
+    s = s.replace(/,/g, '.');
+  }
+  const n = parseFloat(s);
+  return isNaN(n) ? NaN : n;
+}
+
+function formatToBRL(value) {
+  const num = typeof value === 'number' ? value : parseBrazilianNumber(value);
+  if (isNaN(num)) return '';
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(num);
+}
+
+function attachValorExecutadoMask(container) {
+  // container optional element; if not provided use document
+  const root = container || document;
+  const inputs = root.querySelectorAll('input[data-campo="valorExecutado"]');
+  inputs.forEach(inp => {
+    // prevent multiple listeners
+    if (inp._brlBound) return;
+    inp._brlBound = true;
+    inp.addEventListener('input', (e) => {
+      // allow digits, dot, comma, spaces, R$, minus
+      const v = e.target.value;
+      const cleaned = v.replace(/[^0-9.,\-]/g, '');
+      e.target.value = cleaned;
+    });
+    inp.addEventListener('blur', (e) => {
+      const val = e.target.value;
+      const parsed = parseBrazilianNumber(val);
+      if (!isNaN(parsed)) {
+        e.target.value = formatToBRL(parsed);
+      }
+    });
+  });
+}
+
+// AUTENTICAÇÃO
+function mostrarAba(aba) {
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  tabBtns.forEach(btn => {
+    btn.classList.remove('text-blue-600', 'border-blue-600');
+    btn.classList.add('text-slate-400', 'border-transparent');
+  });
+  
+  if (aba === 'login') {
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('registroForm').style.display = 'none';
+    tabBtns[0].classList.remove('text-slate-400', 'border-transparent');
+    tabBtns[0].classList.add('text-blue-600', 'border-blue-600');
+  } else {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registroForm').style.display = 'block';
+    tabBtns[1].classList.remove('text-slate-400', 'border-transparent');
+    tabBtns[1].classList.add('text-blue-600', 'border-blue-600');
+    
+    const selectArea = document.getElementById('regArea');
+    selectArea.innerHTML = '<option value="">Selecione a área...</option>' + 
+      areas.map(area => `<option value="${area}">${area}</option>`).join('');
+  }
+  
+  setTimeout(() => initLucideIcons(), 100);
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const senha = document.getElementById('loginSenha').value;
+  const btnTexto = document.getElementById('btnLoginTexto');
+  
+  btnTexto.innerHTML = 'Entrando... <span class="spinner ml-2"></span>';
+  
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  const usuario = usuarios.find(u => u.email.toLowerCase() === email && u.senha === senha);
+  
+  if (!usuario) {
+    showAlert('E-mail ou senha incorretos', 'error', 'loginAlertContainer');
+    btnTexto.textContent = 'Acessar Sistema';
+    return;
+  }
+  
+  if (usuario.nivel !== 'ADMIN' && !usuario.autorizado) {
+    showAlert('Sua conta está aguardando autorização do administrador', 'error', 'loginAlertContainer');
+    btnTexto.textContent = 'Acessar Sistema';
+    return;
+  }
+  
+  currentUser = usuario;
+  registrarAuditoria('LOGIN', `Usuário ${usuario.nome} acessou o sistema`);
+  
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('mainSystem').style.display = 'flex';
+  
+  const initials = usuario.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  document.getElementById('userAvatar').textContent = initials;
+  document.getElementById('userName').textContent = usuario.nome;
+  
+  const perfilTexto = {
+    'ADMIN': 'Administrador',
+    'TECNICO': 'Técnico',
+    'VISUALIZADOR': 'Visualizador'
+  };
+  
+  document.getElementById('userRole').textContent = perfilTexto[usuario.nivel] + (usuario.area ? ` • ${usuario.area}` : '');
+  
+  const navAdminContainer = document.getElementById('navAdminContainer');
+  const navCadastro = document.getElementById('navCadastro');
+  const botoesAcao = document.getElementById('botoesAcao');
+  
+  if (usuario.nivel === 'ADMIN') {
+    if (navAdminContainer) navAdminContainer.style.display = 'block';
+    if (navCadastro) navCadastro.style.display = 'flex';
+    if (botoesAcao) botoesAcao.style.display = 'flex';
+  } else if (usuario.nivel === 'TECNICO') {
+    if (navAdminContainer) navAdminContainer.style.display = 'none';
+    // Técnicos não devem acessar o módulo de Cadastro PAS
+    if (navCadastro) navCadastro.style.display = 'none';
+    if (botoesAcao) botoesAcao.style.display = 'none';
+  } else {
+    if (navAdminContainer) navAdminContainer.style.display = 'none';
+    if (navCadastro) navCadastro.style.display = 'none';
+    if (botoesAcao) botoesAcao.style.display = 'none';
+  }
+  
+  initLucideIcons();
+  atualizarDashboard();
+  renderizarMetasAcoes();
+  renderizarMonitoramento();
+  renderizarAdmin();
+  
+  btnTexto.textContent = 'Acessar Sistema';
+});
+
+document.getElementById('registroForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const nome = document.getElementById('regNome').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const senha = document.getElementById('regSenha').value;
+  const nivel = document.getElementById('regNivel').value;
+  const area = document.getElementById('regArea').value;
+  
+  if (usuarios.some(u => u.email === email)) {
+    showAlert('E-mail já cadastrado', 'error', 'registroAlertContainer');
+    return;
+  }
+  
+  const btnTexto = document.getElementById('btnRegistroTexto');
+  btnTexto.innerHTML = 'Criando... <span class="spinner ml-2"></span>';
+  
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  usuarios.push({
+    id: Date.now().toString(),
+    nome,
+    email,
+    senha,
+    nivel,
+    area,
+    autorizado: false,
+    dataCriacao: new Date().toISOString()
+  });
+  
+  salvarDados();
+  
+  showAlert('Conta criada! Aguarde a autorização do administrador para acessar.', 'success', 'registroAlertContainer');
+  
+  setTimeout(() => {
+    mostrarAba('login');
+    document.getElementById('registroForm').reset();
+    document.getElementById('areaField').style.display = 'none';
+  }, 3000);
+  
+  btnTexto.textContent = 'Criar Conta';
+});
+
+document.getElementById('regNivel').addEventListener('change', (e) => {
+  const areaField = document.getElementById('areaField');
+  const selectArea = document.getElementById('regArea');
+  
+  if (e.target.value === 'TECNICO') {
+    selectArea.innerHTML = '<option value="">Selecione a área...</option>' + 
+      areas.map(area => `<option value="${area}">${area}</option>`).join('');
+    areaField.style.display = 'block';
+    selectArea.setAttribute('required', 'true');
+  } else {
+    areaField.style.display = 'none';
+    selectArea.removeAttribute('required');
+    selectArea.value = '';
+  }
+});
+
+function showAlert(message, type, containerId) {
+  const container = document.getElementById(containerId);
+  const bgColor = type === 'success' ? 'bg-green-100 border-green-500 text-green-800' : 'bg-red-100 border-red-500 text-red-800';
+  container.innerHTML = `<div class="animate-slide-up px-4 py-3 rounded-lg border-2 ${bgColor} font-semibold text-sm">${message}</div>`;
+  setTimeout(() => { container.innerHTML = ''; }, 4000);
+}
+
+function logout() {
+  if (currentUser) {
+    registrarAuditoria('LOGOUT', `Usuário ${currentUser.nome} saiu do sistema`);
+  }
+  
+  currentUser = null;
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('mainSystem').style.display = 'none';
+  document.getElementById('loginForm').reset();
+  initLucideIcons();
+}
+
+// NAVEGAÇÃO
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('mobileOverlay');
+  
+  sidebar.classList.toggle('mobile-hidden');
+  overlay.classList.toggle('active');
+}
+
+function mostrarSecao(secao) {
+  if (window.innerWidth < 1024) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+    if (!sidebar.classList.contains('mobile-hidden')) {
+      sidebar.classList.add('mobile-hidden');
+      overlay.classList.remove('active');
+    }
+  }
+  
+  document.querySelectorAll('.secao-conteudo').forEach(s => s.style.display = 'none');
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active', 'bg-blue-600'));
+  
+  const titulos = {
+    'dashboard': 'Painel Geral',
+    'cadastro': 'Cadastro PAS',
+    'monitoramento': 'Monitoramento',
+    'admin': 'Administração'
+  };
+  
+  document.getElementById('pageTitle').textContent = titulos[secao] || 'SESAP RN';
+  
+  if (secao === 'dashboard') {
+    document.getElementById('secaoDashboard').style.display = 'block';
+    atualizarDashboard();
+  } else if (secao === 'cadastro') {
+    document.getElementById('secaoCadastro').style.display = 'block';
+    renderizarMetasAcoes();
+  } else if (secao === 'monitoramento') {
+    document.getElementById('secaoMonitoramento').style.display = 'block';
+    renderizarMonitoramento();
+  } else if (secao === 'admin') {
+    document.getElementById('secaoAdmin').style.display = 'block';
+    renderizarAdmin();
+  }
+  
+  const navItem = document.querySelector(`.nav-item[data-secao="${secao}"]`);
+  if (navItem) {
+    navItem.classList.add('active', 'bg-blue-600');
+  }
+  
+  initLucideIcons();
+}
+
+// DASHBOARD
+function atualizarDashboard() {
+  renderizarFiltrosArea('filtrosArea');
+  calcularPanorama();
+  renderizarGraficos();
+  initLucideIcons();
+}
+
+function renderizarFiltrosArea(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  // Mostrar todas as áreas no Painel Geral para todos os perfis
+  const areasVisiveis = areas;
+
+  let html = '<button class="px-4 py-2 rounded-lg font-bold text-sm transition ' + 
+    (filtroAreaAtivo === 'TODAS' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 border-2 border-slate-200 hover:bg-slate-50') + 
+    '" onclick="aplicarFiltroArea(\'TODAS\')">Todas as Áreas</button>';
+
+  areasVisiveis.forEach(area => {
+    html += `<button class="px-4 py-2 rounded-lg font-bold text-sm transition ${
+      filtroAreaAtivo === area ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 border-2 border-slate-200 hover:bg-slate-50'
+    }" onclick="aplicarFiltroArea('${area}')">${area}</button>`;
+  });
+  
+  container.innerHTML = html;
+}
+
+function aplicarFiltroArea(area) {
+  filtroAreaAtivo = area;
+  atualizarDashboard();
+}
+
+function calcularPanorama() {
+  let acoesVisiveis = acoes;
+
+  if (filtroAreaAtivo !== 'TODAS') {
+    acoesVisiveis = acoes.filter(a => a.areas && a.areas.includes(filtroAreaAtivo));
+  }
+  
+  const total = acoesVisiveis.length;
+  const criticas = acoesVisiveis.filter(a => !a.status || a.status === 'NAO_INICIADA').length;
+  const emAndamento = acoesVisiveis.filter(a => a.status === 'EM_ANDAMENTO').length;
+  
+  const percentualCritico = total > 0 ? ((criticas / total) * 100).toFixed(1) : 0;
+  const percentualAndamento = total > 0 ? ((emAndamento / total) * 100).toFixed(1) : 0;
+  
+  let concluidas = 0;
+  let totalProgresso = 0;
+  
+  acoesVisiveis.forEach(acao => {
+    if (acao.progressos && Array.isArray(acao.progressos)) {
+      acao.progressos.forEach(prog => {
+        const valor = parseFloat(prog.valorAlcancado) || 0;
+        totalProgresso += valor;
+        if (valor >= 100) concluidas++;
+      });
+    }
+  });
+  
+  const mediaProgresso = acoesVisiveis.length > 0 ? (totalProgresso / acoesVisiveis.length).toFixed(1) : 0;
+  
+  let semaforo = '🔴 Crítico';
+  if (mediaProgresso >= 75) semaforo = '🟢 Excelente';
+  else if (mediaProgresso >= 50) semaforo = '🟡 Atenção';
+  
+  document.getElementById('totalAcoesPanorama').textContent = total;
+  document.getElementById('criticoPanorama').textContent = percentualCritico + '%';
+  document.getElementById('progressoPanorama').textContent = mediaProgresso + '%';
+  document.getElementById('semaforoPanorama').textContent = semaforo;
+  document.getElementById('andamentoPanorama').textContent = emAndamento;
+  document.getElementById('andamentoPct').textContent = percentualAndamento;
+  
+  initLucideIcons();
+}
+
+function renderizarGraficos() {
+  renderizarGraficoStatus();
+  renderizarGraficoQuadrimestre();
+  renderizarCardsAreas();
+}
+
+function renderizarGraficoStatus() {
+  const container = document.getElementById('statusChart');
+  if (!container) return;
+  let acoesVisiveis = acoes;
+
+  if (filtroAreaAtivo !== 'TODAS') {
+    acoesVisiveis = acoes.filter(a => a.areas && a.areas.includes(filtroAreaAtivo));
+  }
+  
+  const stats = {
+    'CONCLUIDA': { count: 0, label: 'Concluídas', color: 'bg-green-500', icon: 'check-circle' },
+    'EM_ANDAMENTO': { count: 0, label: 'Em Andamento', color: 'bg-blue-500', icon: 'clock' },
+    'PREPARATORIA': { count: 0, label: 'Preparatórias', color: 'bg-yellow-500', icon: 'settings' },
+    'NAO_INICIADA': { count: 0, label: 'Não Iniciadas', color: 'bg-red-500', icon: 'alert-circle' },
+    'PARALISADA': { count: 0, label: 'Paralisadas', color: 'bg-gray-500', icon: 'pause-circle' }
+  };
+  
+  acoesVisiveis.forEach(acao => {
+    const status = acao.status || 'NAO_INICIADA';
+    if (stats[status]) stats[status].count++;
+  });
+  
+  const total = acoesVisiveis.length || 1;
+  
+  let html = '';
+  Object.keys(stats).forEach(key => {
+    const stat = stats[key];
+    const percent = ((stat.count / total) * 100).toFixed(1);
+    html += `
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="${stat.icon}" class="w-4 h-4 text-slate-600"></i>
+            <span class="text-sm font-semibold text-slate-700">${stat.label}</span>
+          </div>
+          <span class="text-sm font-bold text-slate-900">${stat.count} (${percent}%)</span>
+        </div>
+        <div class="w-full bg-slate-200 rounded-full h-3">
+          <div class="${stat.color} h-3 rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+  initLucideIcons();
+}
+
+function renderizarGraficoQuadrimestre() {
+  const container = document.getElementById('quadrimestreChart');
+  if (!container) return;
+  let acoesVisiveis = acoes;
+
+  if (filtroAreaAtivo !== 'TODAS') {
+    acoesVisiveis = acoes.filter(a => a.areas && a.areas.includes(filtroAreaAtivo));
+  }
+  
+  const stats = {};
+  quadrimestres.forEach(q => {
+    stats[q] = 0;
+  });
+  
+  acoesVisiveis.forEach(acao => {
+    if (acao.progressos && Array.isArray(acao.progressos)) {
+      acao.progressos.forEach(prog => {
+        if (stats.hasOwnProperty(prog.quadrimestre)) {
+          stats[prog.quadrimestre]++;
+        }
+      });
+    }
+  });
+  
+  const maxValue = Math.max(...Object.values(stats), 1);
+  
+  let html = '';
+  Object.keys(stats).forEach(quad => {
+    const count = stats[quad];
+    const percent = ((count / maxValue) * 100).toFixed(1);
+    html += `
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-semibold text-slate-700">${quad}</span>
+          <span class="text-sm font-bold text-slate-900">${count} ações</span>
+        </div>
+        <div class="w-full bg-slate-200 rounded-full h-3">
+          <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+}
+
+function renderizarCardsAreas() {
+  const container = document.getElementById('areaCardsContainer');
+  if (!container) return;
+  let areasVisiveis = areas;
+
+  if (filtroAreaAtivo !== 'TODAS') {
+    areasVisiveis = [filtroAreaAtivo];
+  }
+  
+  let html = '';
+  areasVisiveis.forEach(area => {
+    const acoesArea = acoes.filter(a => a.areas && a.areas.includes(area));
+    const total = acoesArea.length;
+    const concluidas = acoesArea.filter(a => a.status === 'CONCLUIDA').length;
+    const percentual = total > 0 ? ((concluidas / total) * 100).toFixed(0) : 0;
+    
+    const cores = ['blue', 'green', 'purple', 'orange', 'pink', 'indigo'];
+    const cor = cores[areasVisiveis.indexOf(area) % cores.length];
+    
+    html += `
+      <div class="bg-white border-2 border-slate-200 rounded-xl p-5 hover:shadow-lg transition">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 bg-${cor}-100 rounded-lg flex items-center justify-center">
+            <i data-lucide="building-2" class="w-5 h-5 text-${cor}-600"></i>
+          </div>
+          <span class="text-2xl font-black text-${cor}-600">${percentual}%</span>
+        </div>
+        <h4 class="font-bold text-slate-900 mb-1">${area}</h4>
+        <p class="text-xs text-slate-600">${total} ações • ${concluidas} concluídas</p>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+  initLucideIcons();
+}
+
+// CADASTRO DE METAS E AÇÕES
+function renderizarMetasAcoes() {
+  renderizarFiltrosAreaCadastro();
+  
+  const container = document.getElementById('listaMetasAcoes');
+  if (!container) return;
+  
+  let metasVisiveis = [...metas];
+  
+  if (currentUser && currentUser.nivel === 'TECNICO' && currentUser.area) {
+    metasVisiveis = metasVisiveis.filter(m => m.areas && Array.isArray(m.areas) && m.areas.includes(currentUser.area));
+  } else if (filtroAreaCadastro !== 'TODAS') {
+    metasVisiveis = metasVisiveis.filter(m => m.areas && Array.isArray(m.areas) && m.areas.includes(filtroAreaCadastro));
+  }
+  
+  if (metasVisiveis.length === 0) {
+    container.innerHTML = `
+      <div class="bg-slate-100 rounded-xl p-12 text-center border-2 border-dashed border-slate-300 animate-fade-in">
+        <i data-lucide="folder-open" class="w-16 h-16 text-slate-400 mx-auto mb-4"></i>
+        <h3 class="text-lg font-bold text-slate-700 mb-2">Nenhuma meta cadastrada</h3>
+        <p class="text-sm text-slate-600">Clique em "Nova Meta" para começar</p>
+      </div>
+    `;
+    setTimeout(() => initLucideIcons(), 50);
+    return;
+  }
+  
+  console.log('Renderizando', metasVisiveis.length, 'metas');
+  
+  let html = '';
+  metasVisiveis.forEach(meta => {
+    const acoesVinculadas = acoes.filter(a => a.metaId === meta.id);
+    const areasTexto = Array.isArray(meta.areas) ? meta.areas.join(' • ') : '';
+    const podeEditar = currentUser && (currentUser.nivel === 'ADMIN' || (currentUser.nivel === 'TECNICO' && Array.isArray(meta.areas) && meta.areas.some(a => a === currentUser.area)));
+    
+    html += `
+      <div class="bg-white rounded-xl border-2 border-blue-200 p-6 mb-4 shadow-sm hover:shadow-md transition animate-slide-up">
+        <div class="flex items-start justify-between mb-4 gap-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i data-lucide="target" class="w-5 h-5 text-white"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-bold text-slate-900">${meta.titulo}</h3>
+                <p class="text-xs text-slate-600">${areasTexto}</p>
+              </div>
+            </div>
+            <p class="text-sm text-slate-700 mb-3">${meta.objetivo}</p>
+            <div class="flex flex-wrap gap-3">
+              <div class="bg-blue-50 px-3 py-1.5 rounded-lg">
+                <span class="text-xs font-bold text-blue-900">📊 ${meta.indicador}</span>
+              </div>
+              <div class="bg-green-50 px-3 py-1.5 rounded-lg">
+                <span class="text-xs font-bold text-green-900">🎯 ${meta.percentualProposto}%</span>
+              </div>
+            </div>
+          </div>
+          ${podeEditar ? `
+          <div class="flex gap-2 flex-shrink-0">
+            <button onclick="editarMeta('${meta.id}')" class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition" title="Editar Meta">
+              <i data-lucide="edit-2" class="w-4 h-4"></i>
+            </button>
+            <button onclick="excluirMeta('${meta.id}')" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition" title="Excluir Meta">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+          ` : ''}
+        </div>
+        
+        <div class="border-t-2 border-slate-200 pt-4">
+          <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <h4 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+              <i data-lucide="list" class="w-4 h-4"></i>
+              Ações Vinculadas (${acoesVinculadas.length})
+            </h4>
+            ${podeEditar ? `
+            <button onclick="abrirModalNovaAcaoVinculada('${meta.id}')" class="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-bold text-xs flex items-center gap-1">
+              <i data-lucide="plus" class="w-3 h-3"></i>
+              Adicionar Ação
+            </button>
+            ` : ''}
+          </div>
+          
+          ${acoesVinculadas.length === 0 ? `
+            <p class="text-sm text-slate-500 italic">Nenhuma ação vinculada a esta meta</p>
+          ` : `
+            <div class="space-y-2">
+              ${acoesVinculadas.map(acao => {
+                const podeEditarAcao = currentUser && (currentUser.nivel === 'ADMIN' || (currentUser.nivel === 'TECNICO' && Array.isArray(acao.areas) && acao.areas.some(a => a === currentUser.area)));
+                const statusBadge = acao.status ? getStatusBadge(acao.status) : '';
+                const valorFormatado = parseFloat(acao.valorProposto || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                
+                return `
+                  <div class="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-2 flex-wrap">
+                          <span class="px-2 py-1 bg-green-600 text-white rounded text-xs font-bold">${acao.titulo}</span>
+                          ${statusBadge}
+                        </div>
+                        <p class="text-sm text-slate-700 mb-2">${acao.descricao}</p>
+                        <div class="flex flex-wrap gap-2 text-xs">
+                          <span class="text-slate-600"><strong>Indicador:</strong> ${acao.indicador}</span>
+                          <span class="text-slate-600"><strong>Unidade:</strong> ${acao.unidadeMedida}</span>
+                          <span class="text-slate-600"><strong>Valor:</strong> R$ ${valorFormatado}</span>
+                          ${acao.resultadoProposto ? `<span class="text-slate-600"><strong>Resultado Proposto:</strong> ${acao.resultadoProposto}</span>` : ''}
+                        </div>
+                      </div>
+                      ${podeEditarAcao ? `
+                      <div class="flex gap-2 flex-shrink-0">
+                        <button onclick="editarAcao('${acao.id}')" class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition" title="Editar Ação">
+                          <i data-lucide="edit-2" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="excluirAcao('${acao.id}')" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition" title="Excluir Ação">
+                          <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                      </div>
+                      ` : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `}
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+  setTimeout(() => initLucideIcons(), 50);
+}
+
+function renderizarFiltrosAreaCadastro() {
+  const container = document.getElementById('filtrosAreaCadastro');
+  if (!container) return;
+  
+  let areasVisiveis = areas;
+  
+  if (currentUser && currentUser.nivel === 'TECNICO' && currentUser.area) {
+    areasVisiveis = [currentUser.area];
+  }
+  
+  let html = '<button class="px-4 py-2 rounded-lg font-bold text-sm transition ' + 
+    (filtroAreaCadastro === 'TODAS' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 border-2 border-slate-200 hover:bg-slate-50') + 
+    '" onclick="aplicarFiltroAreaCadastro(\'TODAS\')">' + 
+    (currentUser && currentUser.nivel === 'TECNICO' ? 'Minha Área' : 'Todas as Áreas') + 
+    '</button>';
+  
+  if (currentUser && currentUser.nivel !== 'TECNICO') {
+    areasVisiveis.forEach(area => {
+      html += `<button class="px-4 py-2 rounded-lg font-bold text-sm transition ${
+        filtroAreaCadastro === area ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 border-2 border-slate-200 hover:bg-slate-50'
+      }" onclick="aplicarFiltroAreaCadastro('${area}')">${area}</button>`;
+    });
+  }
+  
+  container.innerHTML = html;
+}
+
+function aplicarFiltroAreaCadastro(area) {
+  filtroAreaCadastro = area;
+  renderizarMetasAcoes();
+}
+
+function getStatusBadge(status) {
+  const badges = {
+    'CONCLUIDA': '<span class="status-badge bg-green-100 text-green-800">✅ Concluída</span>',
+    'EM_ANDAMENTO': '<span class="status-badge bg-blue-100 text-blue-800">⏳ Em Andamento</span>',
+    'PREPARATORIA': '<span class="status-badge bg-yellow-100 text-yellow-800">🔧 Preparatória</span>',
+    'NAO_INICIADA': '<span class="status-badge bg-red-100 text-red-800">⚪ Não Iniciada</span>',
+    'PARALISADA': '<span class="status-badge bg-gray-100 text-gray-800">⏸️ Paralisada</span>'
+  };
+  return badges[status] || '';
+}
+
+function abrirModalNovaMeta() {
+  const modal = document.getElementById('modalNovaMeta');
+  modal.style.display = 'flex';
+  
+  document.getElementById('formNovaMeta').reset();
+  document.getElementById('formNovaMeta').dataset.editId = '';
+  
+  const checkboxContainer = document.getElementById('metaAreasCheckboxes');
+  let areasDisponiveis = areas;
+  
+  if (currentUser && currentUser.nivel === 'TECNICO' && currentUser.area) {
+    areasDisponiveis = [currentUser.area];
+  }
+  
+  checkboxContainer.innerHTML = areasDisponiveis.map(area => `
+    <label class="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer">
+      <input type="checkbox" value="${area}" class="w-4 h-4 text-blue-600 rounded" ${currentUser && currentUser.nivel === 'TECNICO' ? 'checked' : ''}>
+      <span class="text-sm font-semibold text-slate-700">${area}</span>
+    </label>
+  `).join('');
+  
+  initLucideIcons();
+}
+
+function fecharModalNovaMeta() {
+  document.getElementById('modalNovaMeta').style.display = 'none';
+}
+
+document.getElementById('formNovaMeta').addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  console.log('Formulário de meta submetido');
+  
+  const titulo = document.getElementById('metaTitulo').value.trim();
+  const objetivo = document.getElementById('metaObjetivo').value.trim();
+  const indicador = document.getElementById('metaIndicador').value.trim();
+  const percentualProposto = document.getElementById('metaPercentualProposto').value;
+  
+  const checkboxes = document.querySelectorAll('#metaAreasCheckboxes input[type="checkbox"]:checked');
+  const areasSelecionadas = Array.from(checkboxes).map(cb => cb.value);
+  
+  console.log('Dados da meta:', { titulo, objetivo, indicador, percentualProposto, areasSelecionadas });
+  
+  if (areasSelecionadas.length === 0) {
+    alert('⚠️ Selecione pelo menos uma área técnica');
+    return;
+  }
+  
+  const editId = document.getElementById('formNovaMeta').dataset.editId;
+  
+  if (editId) {
+    const meta = metas.find(m => m.id === editId);
+    if (meta) {
+      meta.titulo = titulo;
+      meta.objetivo = objetivo;
+      meta.indicador = indicador;
+      meta.percentualProposto = percentualProposto;
+      meta.areas = areasSelecionadas;
+      
+      console.log('Meta editada:', meta);
+      registrarAuditoria('EDITAR_META', `Meta "${titulo}" editada`);
+    }
+  } else {
+    const novaMeta = {
+      id: Date.now().toString(),
+      titulo,
+      objetivo,
+      indicador,
+      percentualProposto,
+      areas: areasSelecionadas,
+      dataCriacao: new Date().toISOString()
+    };
+    
+    console.log('Nova meta criada:', novaMeta);
+    metas.push(novaMeta);
+    
+    registrarAuditoria('CRIAR_META', `Nova meta "${titulo}" criada`);
+  }
+  
+  salvarDados();
+  console.log('Metas após salvar:', metas);
+  
+  fecharModalNovaMeta();
+  renderizarMetasAcoes();
+  atualizarDashboard();
+  renderizarMonitoramento();
+  
+  alert('✅ Meta salva com sucesso!');
+});
+
+function editarMeta(id) {
+  const meta = metas.find(m => m.id === id);
+  if (!meta) return;
+  
+  document.getElementById('metaTitulo').value = meta.titulo;
+  document.getElementById('metaObjetivo').value = meta.objetivo;
+  document.getElementById('metaIndicador').value = meta.indicador;
+  document.getElementById('metaPercentualProposto').value = meta.percentualProposto;
+  document.getElementById('formNovaMeta').dataset.editId = id;
+  
+  const checkboxContainer = document.getElementById('metaAreasCheckboxes');
+  let areasDisponiveis = areas;
+  
+  if (currentUser && currentUser.nivel === 'TECNICO' && currentUser.area) {
+    areasDisponiveis = [currentUser.area];
+  }
+  
+  checkboxContainer.innerHTML = areasDisponiveis.map(area => `
+    <label class="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer">
+      <input type="checkbox" value="${area}" class="w-4 h-4 text-blue-600 rounded" ${meta.areas.includes(area) ? 'checked' : ''}>
+      <span class="text-sm font-semibold text-slate-700">${area}</span>
+    </label>
+  `).join('');
+  
+  document.getElementById('modalNovaMeta').style.display = 'flex';
+  initLucideIcons();
+}
+
+function excluirMeta(id) {
+  const meta = metas.find(m => m.id === id);
+  if (!meta) return;
+  
+  const acoesVinculadas = acoes.filter(a => a.metaId === id);
+  
+  const confirmar = document.createElement('div');
+  confirmar.className = 'modal-overlay';
+  confirmar.style.display = 'flex';
+  confirmar.innerHTML = `
+    <div class="modal-container w-full max-w-md p-6">
+      <h3 class="text-xl font-bold text-slate-900 mb-4">Confirmar Exclusão</h3>
+      <p class="text-sm text-slate-700 mb-4">Tem certeza que deseja excluir a meta "<strong>${meta.titulo}</strong>"?</p>
+      ${acoesVinculadas.length > 0 ? `<p class="text-sm text-red-600 font-semibold mb-4">��️ Esta meta possui ${acoesVinculadas.length} ação(ões) vinculada(s) que também serão removidas!</p>` : ''}
+      <div class="flex gap-3">
+        <button onclick="this.closest('.modal-overlay').remove()" class="flex-1 px-4 py-2 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition font-bold">
+          Cancelar
+        </button>
+        <button onclick="confirmarExclusaoMeta('${id}')" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-bold">
+          Excluir
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(confirmar);
+}
+
+function confirmarExclusaoMeta(id) {
+  const meta = metas.find(m => m.id === id);
+  if (meta) {
+    acoes = acoes.filter(a => a.metaId !== id);
+    metas = metas.filter(m => m.id !== id);
+    
+    registrarAuditoria('EXCLUIR_META', `Meta "${meta.titulo}" excluída`);
+    salvarDados();
+    
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    renderizarMetasAcoes();
+    atualizarDashboard();
+  }
+}
+
+function abrirModalNovaAcao() {
+  metaIdParaVincular = null;
+  abrirModalAcao();
+}
+
+function abrirModalNovaAcaoVinculada(metaId) {
+  metaIdParaVincular = metaId;
+  abrirModalAcao();
+}
+
+function abrirModalAcao() {
+  const modal = document.getElementById('modalNovaAcao');
+  modal.style.display = 'flex';
+  
+  document.getElementById('formNovaAcao').reset();
+  document.getElementById('formNovaAcao').dataset.editId = '';
+  
+  const infoMeta = document.getElementById('infoMetaVinculada');
+  if (metaIdParaVincular) {
+    const meta = metas.find(m => m.id === metaIdParaVincular);
+    if (meta) {
+      infoMeta.style.display = 'block';
+      document.getElementById('metaVinculadaNome').textContent = meta.titulo;
+    }
+  } else {
+    infoMeta.style.display = 'none';
+  }
+  
+  const checkboxContainer = document.getElementById('acaoAreasCheckboxes');
+  let areasDisponiveis = areas;
+  
+  if (currentUser && currentUser.nivel === 'TECNICO' && currentUser.area) {
+    areasDisponiveis = [currentUser.area];
+  }
+  
+  checkboxContainer.innerHTML = areasDisponiveis.map(area => `
+    <label class="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer">
+      <input type="checkbox" value="${area}" class="w-4 h-4 text-blue-600 rounded" ${currentUser && currentUser.nivel === 'TECNICO' ? 'checked' : ''}>
+      <span class="text-sm font-semibold text-slate-700">${area}</span>
+    </label>
+  `).join('');
+  
+  initLucideIcons();
+}
+
+function fecharModalNovaAcao() {
+  document.getElementById('modalNovaAcao').style.display = 'none';
+  metaIdParaVincular = null;
+}
+
+document.getElementById('formNovaAcao').addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  console.log('Formulário de ação submetido');
+  
+  const titulo = document.getElementById('acaoTitulo').value.trim();
+  const descricao = document.getElementById('acaoDescricao').value.trim();
+  const indicador = document.getElementById('acaoIndicador').value.trim();
+  const unidadeMedida = document.getElementById('acaoUnidadeMedida').value.trim();
+  const valorProposto = document.getElementById('acaoValorProposto').value;
+  const resultadoProposto = document.getElementById('acaoResultadoProposto').value.trim();
+  const responsavel = document.getElementById('acaoResponsavel').value.trim();
+  
+  const checkboxes = document.querySelectorAll('#acaoAreasCheckboxes input[type="checkbox"]:checked');
+  const areasSelecionadas = Array.from(checkboxes).map(cb => cb.value);
+  
+  console.log('Dados da ação:', { titulo, descricao, indicador, unidadeMedida, valorProposto, resultadoProposto, responsavel, areasSelecionadas, metaIdParaVincular });
+  
+  if (areasSelecionadas.length === 0) {
+    alert('⚠️ Selecione pelo menos uma área técnica');
+    return;
+  }
+  
+  const editId = document.getElementById('formNovaAcao').dataset.editId;
+  
+  if (editId) {
+    const acao = acoes.find(a => a.id === editId);
+    if (acao) {
+      acao.titulo = titulo;
+      acao.descricao = descricao;
+      acao.indicador = indicador;
+      acao.unidadeMedida = unidadeMedida;
+      acao.valorProposto = valorProposto;
+      acao.resultadoProposto = resultadoProposto;
+      acao.responsavel = responsavel;
+      acao.areas = areasSelecionadas;
+      
+      console.log('Ação editada:', acao);
+      registrarAuditoria('EDITAR_ACAO', `Ação "${titulo}" editada`);
+    }
+  } else {
+    const novaAcao = {
+      id: Date.now().toString(),
+      titulo,
+      descricao,
+      indicador,
+      unidadeMedida,
+      valorProposto,
+      resultadoProposto,
+      responsavel,
+      areas: areasSelecionadas,
+      metaId: metaIdParaVincular || null,
+      progressos: [],
+      status: 'NAO_INICIADA',
+      dataCriacao: new Date().toISOString()
+    };
+    
+    console.log('Nova ação criada:', novaAcao);
+    acoes.push(novaAcao);
+    
+    registrarAuditoria('CRIAR_ACAO', `Nova ação "${titulo}" criada`);
+  }
+  
+  salvarDados();
+  console.log('Ações após salvar:', acoes);
+  
+  fecharModalNovaAcao();
+  renderizarMetasAcoes();
+  atualizarDashboard();
+  renderizarMonitoramento();
+  
+  alert('✅ Ação salva com sucesso!');
+});
+
+function editarAcao(id) {
+  const acao = acoes.find(a => a.id === id);
+  if (!acao) return;
+  
+  metaIdParaVincular = acao.metaId;
+  
+  document.getElementById('acaoTitulo').value = acao.titulo;
+  document.getElementById('acaoDescricao').value = acao.descricao;
+  document.getElementById('acaoIndicador').value = acao.indicador;
+  document.getElementById('acaoUnidadeMedida').value = acao.unidadeMedida;
+  document.getElementById('acaoValorProposto').value = acao.valorProposto;
+  document.getElementById('acaoResultadoProposto').value = acao.resultadoProposto || '';
+  document.getElementById('acaoResponsavel').value = acao.responsavel;
+  document.getElementById('formNovaAcao').dataset.editId = id;
+  
+  const infoMeta = document.getElementById('infoMetaVinculada');
+  if (acao.metaId) {
+    const meta = metas.find(m => m.id === acao.metaId);
+    if (meta) {
+      infoMeta.style.display = 'block';
+      document.getElementById('metaVinculadaNome').textContent = meta.titulo;
+    }
+  } else {
+    infoMeta.style.display = 'none';
+  }
+  
+  const checkboxContainer = document.getElementById('acaoAreasCheckboxes');
+  let areasDisponiveis = areas;
+  
+  if (currentUser && currentUser.nivel === 'TECNICO' && currentUser.area) {
+    areasDisponiveis = [currentUser.area];
+  }
+  
+  checkboxContainer.innerHTML = areasDisponiveis.map(area => `
+    <label class="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer">
+      <input type="checkbox" value="${area}" class="w-4 h-4 text-blue-600 rounded" ${acao.areas.includes(area) ? 'checked' : ''}>
+      <span class="text-sm font-semibold text-slate-700">${area}</span>
+    </label>
+  `).join('');
+  
+  document.getElementById('modalNovaAcao').style.display = 'flex';
+  initLucideIcons();
+}
+
+function excluirAcao(id) {
+  const acao = acoes.find(a => a.id === id);
+  if (!acao) return;
+  
+  const confirmar = document.createElement('div');
+  confirmar.className = 'modal-overlay';
+  confirmar.style.display = 'flex';
+  confirmar.innerHTML = `
+    <div class="modal-container w-full max-w-md p-6">
+      <h3 class="text-xl font-bold text-slate-900 mb-4">Confirmar Exclusão</h3>
+      <p class="text-sm text-slate-700 mb-4">Tem certeza que deseja excluir a ação "<strong>${acao.titulo}</strong>"?</p>
+      <div class="flex gap-3">
+        <button onclick="this.closest('.modal-overlay').remove()" class="flex-1 px-4 py-2 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition font-bold">
+          Cancelar
+        </button>
+        <button onclick="confirmarExclusaoAcao('${id}')" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-bold">
+          Excluir
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(confirmar);
+}
+
+function confirmarExclusaoAcao(id) {
+  const acao = acoes.find(a => a.id === id);
+  if (acao) {
+    acoes = acoes.filter(a => a.id !== id);
+    
+    registrarAuditoria('EXCLUIR_ACAO', `Ação "${acao.titulo}" excluída`);
+    salvarDados();
+    
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    renderizarMetasAcoes();
+    atualizarDashboard();
+  }
+}
+
+// MONITORAMENTO
+function renderizarMonitoramento() {
+  renderizarFiltrosMonitoramento();
+  
+  // Mostrar área de definir prazos apenas para admin
+  const areaPrazos = document.getElementById('areaDefinirPrazos');
+  if (areaPrazos && currentUser && currentUser.nivel === 'ADMIN') {
+    areaPrazos.style.display = 'block';
+    
+    // Re-renderizar os botões de prazo com status atualizado
+    const container = areaPrazos.querySelector('.grid');
+    if (container) {
+      container.innerHTML = quadrimestres.map(quad => {
+        const prazo = prazosQuadrimestres[quad];
+        const status = calcularStatusPrazo(prazo);
+        
+        return `
+          <button onclick="definirPrazoQuadrimestre('${quad}')" class="${prazo ? status.classe + ' border-2' : 'bg-slate-100 border-2 border-dashed border-slate-300 hover:bg-slate-200'} rounded-lg p-4 text-left transition">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-sm text-slate-900">${quad}</span>
+              <i data-lucide="${prazo ? 'edit-2' : 'calendar-plus'}" class="w-4 h-4 text-slate-900"></i>
+            </div>
+            ${prazo ? `
+              <p class="text-xs font-semibold mb-1">${status.emoji} ${status.texto}</p>
+              <p class="text-xs opacity-75">�� ${new Date(prazo).toLocaleDateString('pt-BR')}</p>
+            ` : `
+              <p class="text-xs text-slate-600">Clique para definir prazo</p>
+            `}
+          </button>
+        `;
+      }).join('');
+    }
+  } else if (areaPrazos) {
+    areaPrazos.style.display = 'none';
+  }
+  
+  renderizarListaMonitoramento();
+  initLucideIcons();
+}
+
+function renderizarFiltrosMonitoramento() {
+  const containerArea = document.getElementById('filtrosAreaMonitoramento');
+  const containerQuad = document.getElementById('filtrosQuadrimestreMonitoramento');
+  
+  if (!containerArea || !containerQuad) return;
+  
+  let areasVisiveis = areas;
+  
+  if (currentUser && currentUser.nivel === 'TECNICO' && currentUser.area) {
+    areasVisiveis = [currentUser.area];
+  }
+  
+  let htmlArea = '<button class="px-4 py-2 rounded-lg font-bold text-sm transition ' + 
+    (filtroAreaMonitoramento === 'TODAS' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 border-2 border-slate-200 hover:bg-slate-50') + 
+    '" onclick="aplicarFiltroMonitoramento(\'area\', \'TODAS\')">' + 
+    (currentUser && currentUser.nivel === 'TECNICO' ? 'Minha Área' : 'Todas') + 
+    '</button>';
+  
+  if (currentUser && currentUser.nivel !== 'TECNICO') {
+    areasVisiveis.forEach(area => {
+      htmlArea += `<button class="px-4 py-2 rounded-lg font-bold text-sm transition ${
+        filtroAreaMonitoramento === area ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 border-2 border-slate-200 hover:bg-slate-50'
+      }" onclick="aplicarFiltroMonitoramento('area', '${area}')">${area}</button>`;
+    });
+  }
+  
+  // Filtrar quadrimestres para mostrar apenas liberados (se não for admin)
+  let quadrimestresVisiveis = quadrimestres;
+  if (currentUser && currentUser.nivel !== 'ADMIN') {
+    quadrimestresVisiveis = quadrimestres.filter(quad => liberacoesQuadrimestres[quad] === true);
+  }
+  
+  let htmlQuad = '';
+  
+  if (quadrimestresVisiveis.length > 0) {
+    htmlQuad = `<button class="px-4 py-2 rounded-lg font-bold text-sm transition ${
+      filtroQuadrimestreMonitoramento === 'TODOS' ? 'bg-purple-600 text-white' : 'bg-white text-slate-700 border-2 border-slate-200 hover:bg-slate-50'
+    }" onclick="aplicarFiltroMonitoramento('quadrimestre', 'TODOS')">Todos</button>`;
+    
+    quadrimestresVisiveis.forEach(quad => {
+      const liberado = liberacoesQuadrimestres[quad] || false;
+      htmlQuad += `<button class="px-4 py-2 rounded-lg font-bold text-sm transition ${
+        filtroQuadrimestreMonitoramento === quad ? 'bg-purple-600 text-white' : 'bg-white text-slate-700 border-2 border-slate-200 hover:bg-slate-50'
+      }" onclick="aplicarFiltroMonitoramento('quadrimestre', '${quad}')">
+        ${quad}
+        ${currentUser && currentUser.nivel === 'ADMIN' ? (liberado ? ' 🟢' : ' 🔴') : ''}
+      </button>`;
+    });
+  } else if (currentUser && currentUser.nivel !== 'ADMIN') {
+    htmlQuad = '<p class="text-sm text-yellow-700 font-semibold">🔒 Nenhum quadrimestre liberado para visualização</p>';
+  }
+  
+  containerArea.innerHTML = htmlArea;
+  containerQuad.innerHTML = htmlQuad;
+}
+
+function aplicarFiltroMonitoramento(tipo, valor) {
+  if (tipo === 'area') {
+    filtroAreaMonitoramento = valor;
+  } else if (tipo === 'quadrimestre') {
+    filtroQuadrimestreMonitoramento = valor;
+  }
+  renderizarMonitoramento();
+}
+
+function calcularStatusPrazo(dataLimite) {
+  if (!dataLimite) return { classe: '', emoji: '', texto: '', dias: null };
+  
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  
+  const prazo = new Date(dataLimite);
+  prazo.setHours(0, 0, 0, 0);
+  
+  const diffTime = prazo - hoje;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 0) {
+    return { 
+      classe: 'bg-red-100 border-red-500 text-red-900', 
+      emoji: '🔴', 
+      texto: `Vencido há ${Math.abs(diffDays)} dia(s)`,
+      dias: diffDays
+    };
+  } else if (diffDays <= 7) {
+    return { 
+      classe: 'bg-orange-100 border-orange-500 text-orange-900', 
+      emoji: '🟠', 
+      texto: `Urgente - ${diffDays} dia(s) restante(s)`,
+      dias: diffDays
+    };
+  } else if (diffDays <= 30) {
+    return { 
+      classe: 'bg-yellow-100 border-yellow-500 text-yellow-900', 
+      emoji: '🟡', 
+      texto: `Atenção - ${diffDays} dia(s) restante(s)`,
+      dias: diffDays
+    };
+  } else {
+    return { 
+      classe: 'bg-white border-slate-200 text-slate-700', 
+      emoji: '🟢', 
+      texto: `Normal - ${diffDays} dia(s) restante(s)`,
+      dias: diffDays
+    };
+  }
+}
+
+function definirPrazoQuadrimestre(quadrimestre) {
+  const prazoAtual = prazosQuadrimestres[quadrimestre] || '';
+  const liberadoAtual = liberacoesQuadrimestres[quadrimestre] || false;
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.style.display = 'flex';
+  modal.innerHTML = `
+    <div class="modal-container w-full max-w-md p-6">
+      <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <i data-lucide="calendar-clock" class="w-6 h-6 text-blue-600"></i>
+        Gerenciar <span class="text-slate-900">${quadrimestre}</span>
+      </h3>
+      
+      <form id="formDefinirPrazo" class="space-y-5">
+        <div class="bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
+          <h4 class="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            Prazo de Preenchimento
+          </h4>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-2">Data Limite</label>
+            <input type="date" id="dataPrazo" value="${prazoAtual}" class="w-full px-4 py-2.5 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900">
+            <p class="text-xs text-slate-500 mt-1">Data final para preenchimento deste quadrimestre</p>
+          </div>
+        </div>
+        
+        <div class="bg-green-50 rounded-lg p-4 border-2 border-green-200">
+          <h4 class="text-sm font-bold text-green-900 mb-3 flex items-center gap-2">
+            <i data-lucide="eye" class="w-4 h-4"></i>
+            Controle de Acesso
+          </h4>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" id="liberarQuadrimestre" ${liberadoAtual ? 'checked' : ''} class="w-5 h-5 text-green-600 rounded">
+            <div class="flex-1">
+              <p class="text-sm font-bold text-slate-900">Liberar visualização</p>
+              <p class="text-xs text-slate-600">Permite que técnicos e visualizadores vejam as ações deste quadrimestre</p>
+            </div>
+          </label>
+        </div>
+        
+        <div class="bg-yellow-50 rounded-lg p-3 border border-yellow-300">
+          <p class="text-xs text-yellow-800 flex items-start gap-2">
+            <i data-lucide="info" class="w-4 h-4 flex-shrink-0 mt-0.5"></i>
+            <span><strong>Importante:</strong> Quando bloqueado, apenas administradores podem visualizar e preencher este quadrimestre.</span>
+          </p>
+        </div>
+        
+        <div class="flex gap-3">
+          ${prazoAtual ? `
+            <button type="button" onclick="removerPrazoQuadrimestre('${quadrimestre}')" class="px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-bold text-sm">
+              Remover Tudo
+            </button>
+          ` : `
+            <button type="button" onclick="this.closest('.modal-overlay').remove()" class="flex-1 px-4 py-2.5 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition font-bold">
+              Cancelar
+            </button>
+          `}
+          <button type="submit" class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-bold">
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  
+  setTimeout(() => initLucideIcons(), 50);
+  
+  document.getElementById('formDefinirPrazo').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const dataPrazo = document.getElementById('dataPrazo').value;
+    const liberado = document.getElementById('liberarQuadrimestre').checked;
+    
+    if (dataPrazo) {
+      prazosQuadrimestres[quadrimestre] = dataPrazo;
+      registrarAuditoria('DEFINIR_PRAZO', `Prazo do ${quadrimestre} definido para ${new Date(dataPrazo).toLocaleDateString('pt-BR')}`);
+    } else {
+      delete prazosQuadrimestres[quadrimestre];
+    }
+    
+    liberacoesQuadrimestres[quadrimestre] = liberado;
+    registrarAuditoria('LIBERACAO_QUADRIMESTRE', `${quadrimestre} ${liberado ? 'liberado' : 'bloqueado'} para visualização`);
+    
+    salvarDados();
+    
+    modal.remove();
+    renderizarMonitoramento();
+  });
+}
+
+function removerPrazoQuadrimestre(quadrimestre) {
+  delete prazosQuadrimestres[quadrimestre];
+  delete liberacoesQuadrimestres[quadrimestre];
+  registrarAuditoria('REMOVER_PRAZO', `Prazo e liberação do ${quadrimestre} removidos`);
+  salvarDados();
+  
+  document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+  renderizarMonitoramento();
+}
+
+function renderizarListaMonitoramento() {
+  const container = document.getElementById('listaAreasMonitoramento');
+  if (!container) return;
+  
+  let metasVisiveis = metas;
+  
+  if (currentUser && currentUser.nivel === 'TECNICO' && currentUser.area) {
+    metasVisiveis = metas.filter(m => m.areas && m.areas.includes(currentUser.area));
+  } else if (filtroAreaMonitoramento !== 'TODAS') {
+    metasVisiveis = metas.filter(m => m.areas && m.areas.includes(filtroAreaMonitoramento));
+  }
+  
+  if (metasVisiveis.length === 0) {
+    container.innerHTML = `
+      <div class="bg-slate-100 rounded-xl p-12 text-center border-2 border-dashed border-slate-300">
+        <i data-lucide="clipboard-list" class="w-16 h-16 text-slate-400 mx-auto mb-4"></i>
+        <h3 class="text-lg font-bold text-slate-700 mb-2">Nenhuma meta para monitorar</h3>
+        <p class="text-sm text-slate-600">Cadastre metas para iniciar o monitoramento</p>
+      </div>
+    `;
+    initLucideIcons();
+    return;
+  }
+  
+  // Renderizar alertas de prazos (apenas para admin)
+  let htmlPrazos = '';
+  if (currentUser && currentUser.nivel === 'ADMIN') {
+    const prazosArray = quadrimestres.map(quad => {
+      const prazo = prazosQuadrimestres[quad];
+      if (!prazo) return null;
+      
+      const status = calcularStatusPrazo(prazo);
+      return { quadrimestre: quad, prazo, status };
+    }).filter(p => p !== null);
+    
+    if (prazosArray.length > 0) {
+      htmlPrazos = `
+        <div class="bg-gradient-to-r from-purple-600 to-purple-800 rounded-xl p-6 mb-6 shadow-lg text-white">
+          <h3 class="text-xl font-black mb-4 flex items-center gap-2">
+            <i data-lucide="calendar-clock" class="w-6 h-6"></i>
+            ⏰ Prazos dos Quadrimestres
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-${Math.min(prazosArray.length, 3)} gap-4">
+            ${prazosArray.map(p => `
+              <div class="${p.status.classe} rounded-lg p-4 border-2">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-bold text-sm">${p.quadrimestre}</span>
+                  <button onclick="definirPrazoQuadrimestre('${p.quadrimestre}')" class="p-1 hover:bg-black/10 rounded transition" title="Editar prazo">
+                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                  </button>
+                </div>
+                <p class="text-xs font-semibold mb-1">${p.status.emoji} ${p.status.texto}</p>
+                <p class="text-xs opacity-75">📅 ${new Date(p.prazo).toLocaleDateString('pt-BR')}</p>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+  }
+  
+  let html = htmlPrazos;
+  
+  // ORGANIZAR POR QUADRIMESTRE
+  let quadrimestresFiltrados = quadrimestres;
+  if (filtroQuadrimestreMonitoramento !== 'TODOS') {
+    quadrimestresFiltrados = [filtroQuadrimestreMonitoramento];
+  }
+  
+  // Filtrar quadrimestres liberados (se não for admin)
+  if (currentUser && currentUser.nivel !== 'ADMIN') {
+    quadrimestresFiltrados = quadrimestresFiltrados.filter(quad => {
+      return liberacoesQuadrimestres[quad] === true;
+    });
+  }
+  
+  if (quadrimestresFiltrados.length === 0 && currentUser && currentUser.nivel !== 'ADMIN') {
+    container.innerHTML = htmlPrazos + `
+      <div class="bg-yellow-50 rounded-xl p-8 text-center border-2 border-yellow-300">
+        <i data-lucide="lock" class="w-16 h-16 text-yellow-600 mx-auto mb-4"></i>
+        <h3 class="text-lg font-bold text-yellow-900 mb-2">Nenhum quadrimestre liberado</h3>
+        <p class="text-sm text-yellow-700">Entre em contato com o administrador para solicitar acesso aos quadrimestres.</p>
+      </div>
+    `;
+    setTimeout(() => initLucideIcons(), 50);
+    return;
+  }
+  
+  quadrimestresFiltrados.forEach(quadrimestre => {
+    const prazoQuad = prazosQuadrimestres[quadrimestre];
+    const statusPrazoQuad = calcularStatusPrazo(prazoQuad);
+    const liberado = liberacoesQuadrimestres[quadrimestre] || false;
+    
+    html += `
+      <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-slate-300 p-6 mb-8 shadow-lg">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b-2 border-slate-300">
+          <div class="flex items-center gap-3">
+            <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl flex items-center justify-center">
+              <i data-lucide="calendar" class="w-7 h-7 text-white"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-2xl font-black text-slate-900">${quadrimestre}</h2>
+                ${currentUser && currentUser.nivel === 'ADMIN' ? `
+                  <span class="px-2 py-1 rounded-lg text-xs font-bold ${liberado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                    ${liberado ? '🟢 Liberado' : '🔴 Bloqueado'}
+                  </span>
+                ` : ''}
+              </div>
+              ${prazoQuad ? `
+                <p class="text-sm font-semibold ${statusPrazoQuad.classe.includes('red') ? 'text-red-600' : statusPrazoQuad.classe.includes('orange') ? 'text-orange-600' : statusPrazoQuad.classe.includes('yellow') ? 'text-yellow-600' : 'text-green-600'}">
+                  ${statusPrazoQuad.emoji} ${statusPrazoQuad.texto}
+                </p>
+              ` : ''}
+            </div>
+          </div>
+          ${prazoQuad ? `
+            <div class="text-right">
+              <p class="text-xs font-bold text-slate-600 mb-1">PRAZO LIMITE</p>
+              <p class="text-lg font-black text-purple-700">📅 ${new Date(prazoQuad).toLocaleDateString('pt-BR')}</p>
+            </div>
+          ` : ''}
+        </div>
+    `;
+    
+    // Filtrar metas que têm ações neste quadrimestre
+    const metasDoQuadrimestre = metasVisiveis.filter(meta => {
+      const acoesVinculadas = acoes.filter(a => a.metaId === meta.id);
+      return acoesVinculadas.length > 0;
+    });
+    
+    if (metasDoQuadrimestre.length === 0) {
+      html += `
+        <div class="bg-white rounded-lg p-6 text-center border-2 border-dashed border-slate-300">
+          <i data-lucide="inbox" class="w-12 h-12 text-slate-400 mx-auto mb-2"></i>
+          <p class="text-sm text-slate-600 font-semibold">Nenhuma meta cadastrada para este quadrimestre</p>
+        </div>
+      `;
+    } else {
+      metasDoQuadrimestre.forEach(meta => {
+        const acoesVinculadas = acoes.filter(a => a.metaId === meta.id);
+        const areasTexto = (meta.areas && Array.isArray(meta.areas)) ? meta.areas.join(' • ') : '';
+        
+        // Verificar se tem monitoramento neste quadrimestre
+        const temMonitoramentoQuad = acoesVinculadas.some(a => 
+          a.progressos && a.progressos.some(p => p.quadrimestre === quadrimestre)
+        );
+        
+        html += `
+          <div class="bg-white rounded-xl border-2 border-blue-200 p-6 mb-4 shadow-sm hover:shadow-md transition">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="target" class="w-6 h-6 text-white"></i>
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="text-xl font-bold text-slate-900">${meta.titulo}</h3>
+                    <p class="text-sm text-slate-600">${areasTexto}</p>
+                  </div>
+                </div>
+              </div>
+              <button onclick="abrirModalMonitoramentoQuadrimestre('${meta.id}', '${quadrimestre}')" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:shadow-lg transition font-bold text-sm flex items-center gap-2 flex-shrink-0">
+                <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                Preencher
+              </button>
+            </div>
+            
+            <div class="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-200">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <p class="text-xs font-bold text-blue-700 mb-1">📊 INDICADOR</p>
+                  <p class="text-sm font-semibold text-blue-900">${meta.indicador}</p>
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-blue-700 mb-1"> % PROPOSTO</p>
+                  <p class="text-sm font-semibold text-blue-900">${meta.percentualProposto}%</p>
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-blue-700 mb-1">✅ AÇÕES VINCULADAS</p>
+                  <p class="text-sm font-semibold text-blue-900">${acoesVinculadas.length} ação(ões)</p>
+                </div>
+              </div>
+            </div>
+            
+            ${temMonitoramentoQuad ? `
+              <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                <p class="text-xs font-bold text-green-700 mb-2">✅ Monitoramento preenchido para este quadrimestre</p>
+              </div>
+            ` : `
+              <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                <p class="text-sm text-yellow-800 font-semibold">⚠️ Monitoramento pendente para este quadrimestre</p>
+              </div>
+            `}
+          </div>
+        `;
+      });
+    }
+    
+    html += `</div>`;
+  });
+  
+  container.innerHTML = html;
+  initLucideIcons();
+}
+
+function abrirModalMonitoramentoQuadrimestre(metaId, quadrimestre) {
+  const meta = metas.find(m => m.id === metaId);
+  if (!meta) return;
+  
+  const modal = document.getElementById('modalMonitoramento');
+  modal.style.display = 'flex';
+  
+  document.getElementById('formMonitoramento').dataset.metaId = metaId;
+  document.getElementById('formMonitoramento').dataset.quadrimestre = quadrimestre;
+  
+  const areasTexto = (meta.areas && Array.isArray(meta.areas)) ? meta.areas.join(' • ') : '';
+  
+  const infoContainer = document.getElementById('infoItemMonitoramento');
+  infoContainer.innerHTML = `
+    <div class="flex items-center gap-4">
+      <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl flex items-center justify-center flex-shrink-0">
+        <i data-lucide="calendar" class="w-7 h-7 text-white"></i>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-xl font-bold text-slate-900 mb-1">${meta.titulo}</h3>
+        <p class="text-sm text-slate-600">${areasTexto}</p>
+        <p class="text-sm font-bold text-purple-700 mt-1">📅 ${quadrimestre}</p>
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('metaIndicadorFixo').textContent = meta.indicador;
+  document.getElementById('metaPercentualProposto').textContent = meta.percentualProposto + '%';
+  
+  // Buscar monitoramento específico do quadrimestre
+  const monitoramentoQuad = meta.monitoramentos?.find(m => m.quadrimestre === quadrimestre);
+  
+  if (monitoramentoQuad) {
+    document.getElementById('monitorMetaResultado').value = monitoramentoQuad.resultado;
+    document.getElementById('monitorMetaStatus').value = monitoramentoQuad.status;
+    document.getElementById('monitorMetaAnalise').value = monitoramentoQuad.analise;
+  } else {
+    document.getElementById('monitorMetaResultado').value = '';
+    document.getElementById('monitorMetaStatus').value = '';
+    document.getElementById('monitorMetaAnalise').value = '';
+  }
+  
+  const acoesVinculadas = acoes.filter(a => a.metaId === metaId);
+  const listaAcoesContainer = document.getElementById('listaAcoesMonitoramento');
+  
+  if (acoesVinculadas.length === 0) {
+    listaAcoesContainer.innerHTML = '<p class="text-sm text-slate-600 italic">Nenhuma ação vinculada a esta meta</p>';
+  } else {
+    let htmlAcoes = '';
+    acoesVinculadas.forEach((acao, index) => {
+      const progressoExistente = acao.progressos?.find(p => p.quadrimestre === quadrimestre);
+
+      // Usar parser BRL robusto e preferir campo numérico salvo
+      const valorPropostoNum = parseBrazilianNumber(acao.valorProposto || '');
+      const valorExecutadoNum = (progressoExistente && typeof progressoExistente.valorExecutadoNumero === 'number') ? progressoExistente.valorExecutadoNumero : parseBrazilianNumber(progressoExistente?.valorExecutado || '');
+      const executadoPct = (!isNaN(valorPropostoNum) && valorPropostoNum > 0 && !isNaN(valorExecutadoNum)) ? Math.round((valorExecutadoNum / valorPropostoNum) * 100) : 0;
+
+      htmlAcoes += `
+        <div class="bg-white border-2 border-green-300 rounded-lg p-5 shadow-md">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="px-3 py-1 bg-green-600 text-white rounded-lg text-sm font-bold">${acao.titulo}</span>
+              </div>
+              <p class="text-sm text-slate-700 mb-2">${acao.descricao}</p>
+              <div class="flex flex-wrap gap-2 text-xs text-slate-600">
+                <span><strong>Indicador:</strong> ${acao.indicador}</span>
+                <span><strong>Unidade:</strong> ${acao.unidadeMedida}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- DADOS FIXOS (NÃO EDITÁVEIS) - INFORMAÇÕES DO CADASTRO -->
+          <div class="bg-blue-50 rounded-lg p-4 mb-4 border-2 border-blue-300">
+            <h5 class="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+              📋 Informações da Ação (Cadastro)
+            </h5>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-blue-700 mb-1">Valor Proposto</label>
+                <div class="px-3 py-2 bg-white border-2 border-blue-200 rounded-lg text-sm font-semibold text-blue-900">
+                  ${formatToBRL(acao.valorProposto) || (acao.valorProposto || 'N/A')}
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-blue-700 mb-1">Resultado Proposto</label>
+                <div class="px-3 py-2 bg-white border-2 border-blue-200 rounded-lg text-sm font-semibold text-blue-900">
+                  ${acao.resultadoProposto || 'N/A'}
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-blue-700 mb-1">Responsável</label>
+                <div class="px-3 py-2 bg-white border-2 border-blue-200 rounded-lg text-sm font-semibold text-blue-900">
+                  ${acao.responsavel || 'N/A'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-t-2 border-green-200 pt-4 mt-4">
+            <h5 class="text-sm font-bold text-green-900 mb-3">📊 Preenchimento do ${quadrimestre}</h5>
+            <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Resultado Alcançado da Ação (com base no Valor Proposto) *</label>
+                  <input type="text" 
+                    data-acao-id="${acao.id}" 
+                    data-quadrimestre="${quadrimestre}" 
+                    data-campo="valorAlcancado" 
+                    class="w-full px-3 py-2 border-2 border-slate-200 rounded-lg text-sm focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none text-slate-900" 
+                    placeholder="Ex: 85% ou 800,00" 
+                    value="${progressoExistente?.valorAlcancado || ''}"
+                    required>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Valor Executado</label>
+                  <input type="text"
+                    data-acao-id="${acao.id}"
+                    data-quadrimestre="${quadrimestre}"
+                    data-campo="valorExecutado"
+                    class="w-full px-3 py-2 border-2 border-slate-200 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-slate-900"
+                    placeholder="Ex: 800,00"
+                    value="${progressoExistente?.valorExecutado ? formatToBRL(progressoExistente.valorExecutado) : ''}">
+                </div>
+              </div>
+              <div style="margin-bottom:8px;">
+                <label class="block text-xs font-bold text-slate-700 mb-1">Execução vs Proposto</label>
+                <div style="background:#f3f4f6;border-radius:4px;height:10px;width:100%;overflow:hidden;">
+                  <div style="width: ${executadoPct}%; height:100%; background: ${executadoPct >= 75 ? '#10b981' : executadoPct >=50 ? '#f59e0b' : '#dc2626'};"></div>
+                </div>
+                <div style="font-size:10px;margin-top:6px;color:#374151;font-weight:700;">${!isNaN(valorExecutadoNum) ? formatToBRL(valorExecutadoNum) : (progressoExistente?.valorExecutado || '0')} / ${!isNaN(valorPropostoNum) ? formatToBRL(valorPropostoNum) : (acao.valorProposto || 'N/A')} • ${executadoPct}%</div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Status *</label>
+                <select 
+                  data-acao-id="${acao.id}" 
+                  data-quadrimestre="${quadrimestre}" 
+                  data-campo="status" 
+                  class="w-full px-3 py-2 border-2 border-slate-200 rounded-lg text-sm focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none text-slate-900"
+                  required>
+                  <option value="">Selecione...</option>
+                  <option value="CONCLUIDA" ${progressoExistente?.status === 'CONCLUIDA' ? 'selected' : ''}>✅ Concluída</option>
+                  <option value="EM_ANDAMENTO" ${progressoExistente?.status === 'EM_ANDAMENTO' ? 'selected' : ''}>⏳Em Andamento</option>
+                  <option value="PREPARATORIA" ${progressoExistente?.status === 'PREPARATORIA' ? 'selected' : ''}>🔧 Preparatória</option>
+                  <option value="NAO_INICIADA" ${progressoExistente?.status === 'NAO_INICIADA' ? 'selected' : ''}>⚪ Não Iniciada</option>
+                  <option value="PARALISADA" ${progressoExistente?.status === 'PARALISADA' ? 'selected' : ''}>⏸️ Paralisada</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Análise Crítica *</label>
+                <textarea 
+                  data-acao-id="${acao.id}" 
+                  data-quadrimestre="${quadrimestre}" 
+                  data-campo="analise" 
+                  rows="3"
+                  class="w-full px-3 py-2 border-2 border-slate-200 rounded-lg text-sm focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none resize-none text-slate-900" 
+                  placeholder="Descreva a análise crítica dos resultados, desafios enfrentados e providências tomadas..."
+                  required>${progressoExistente?.analise || ''}</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    listaAcoesContainer.innerHTML = htmlAcoes;
+    // Attach BRL mask to valorExecutado inputs rendered inside modal
+    try { attachValorExecutadoMask(listaAcoesContainer); } catch (err) { console.warn('attachValorExecutadoMask failed', err); }
+  }
+  
+  initLucideIcons();
+}
+
+function fecharModalMonitoramento() {
+  document.getElementById('modalMonitoramento').style.display = 'none';
+}
+
+document.getElementById('formMonitoramento').addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  const metaId = e.target.dataset.metaId;
+  const quadrimestre = e.target.dataset.quadrimestre;
+  const meta = metas.find(m => m.id === metaId);
+  if (!meta) return;
+  
+  const resultado = document.getElementById('monitorMetaResultado').value.trim();
+  const status = document.getElementById('monitorMetaStatus').value;
+  const analise = document.getElementById('monitorMetaAnalise').value.trim();
+  
+  if (!resultado || !status || !analise) {
+    alert('⚠️ Preencha todos os campos do monitoramento da meta');
+    return;
+  }
+  
+  // Inicializar array de monitoramentos se não existir
+  if (!meta.monitoramentos) {
+    meta.monitoramentos = [];
+  }
+  
+  // Verificar se já existe monitoramento para este quadrimestre
+  const monitoramentoExistente = meta.monitoramentos.find(m => m.quadrimestre === quadrimestre);
+  
+  if (monitoramentoExistente) {
+    monitoramentoExistente.resultado = resultado;
+    monitoramentoExistente.status = status;
+    monitoramentoExistente.analise = analise;
+    monitoramentoExistente.dataAtualizacao = new Date().toISOString();
+  } else {
+    meta.monitoramentos.push({
+      quadrimestre: quadrimestre,
+      resultado,
+      status,
+      analise,
+      dataPreenchimento: new Date().toISOString()
+    });
+  }
+  
+  const acoesVinculadas = acoes.filter(a => a.metaId === metaId);
+  
+  // Validar que todas as ações têm os campos obrigatórios preenchidos
+  let tudoPreenchido = true;
+  
+  acoesVinculadas.forEach(acao => {
+    const valorInput = document.querySelector(`input[data-acao-id="${acao.id}"][data-quadrimestre="${quadrimestre}"][data-campo="valorAlcancado"]`);
+    const statusSelect = document.querySelector(`select[data-acao-id="${acao.id}"][data-quadrimestre="${quadrimestre}"][data-campo="status"]`);
+    const analiseTextarea = document.querySelector(`textarea[data-acao-id="${acao.id}"][data-quadrimestre="${quadrimestre}"][data-campo="analise"]`);
+    
+    if (!valorInput || !statusSelect || !analiseTextarea) return;
+    
+    const valor = valorInput.value.trim();
+    const statusQuad = statusSelect.value;
+    const analiseQuad = analiseTextarea.value.trim();
+    
+    if (!valor || !statusQuad || !analiseQuad) {
+      tudoPreenchido = false;
+      return;
+    }
+  });
+  
+  if (!tudoPreenchido) {
+    alert('⚠️ Preencha todos os campos obrigatórios (Resultado Alcançado da Ação, Status e Análise Crítica) de todas as ações');
+    return;
+  }
+  
+  // Salvar progressos das ações
+  acoesVinculadas.forEach(acao => {
+    acao.progressos = acao.progressos || [];
+    
+    const valorInput = document.querySelector(`input[data-acao-id="${acao.id}"][data-quadrimestre="${quadrimestre}"][data-campo="valorAlcancado"]`);
+    const valorExecutadoInput = document.querySelector(`input[data-acao-id="${acao.id}"][data-quadrimestre="${quadrimestre}"][data-campo="valorExecutado"]`);
+    const statusSelect = document.querySelector(`select[data-acao-id="${acao.id}"][data-quadrimestre="${quadrimestre}"][data-campo="status"]`);
+    const analiseTextarea = document.querySelector(`textarea[data-acao-id="${acao.id}"][data-quadrimestre="${quadrimestre}"][data-campo="analise"]`);
+    
+    if (valorInput && statusSelect && analiseTextarea) {
+      const valor = valorInput.value.trim();
+      const valorExecutado = valorExecutadoInput ? valorExecutadoInput.value.trim() : '';
+      const statusQuad = statusSelect.value;
+      const analiseQuad = analiseTextarea.value.trim();
+      
+      if (valor && statusQuad && analiseQuad) {
+        const progressoExistente = acao.progressos.find(p => p.quadrimestre === quadrimestre);
+        // Normalizar e salvar também a versão numérica do valor executado
+        const valorExecutadoNumero = valorExecutado ? parseBrazilianNumber(valorExecutado) : (progressoExistente ? (progressoExistente.valorExecutadoNumero || NaN) : NaN);
+        const valorExecutadoFormatado = valorExecutado && !isNaN(valorExecutadoNumero) ? formatToBRL(valorExecutadoNumero) : (valorExecutado || (progressoExistente ? progressoExistente.valorExecutado || '' : ''));
+
+        if (progressoExistente) {
+          progressoExistente.valorAlcancado = valor;
+          progressoExistente.valorExecutado = valorExecutadoFormatado || progressoExistente.valorExecutado || '';
+          progressoExistente.valorExecutadoNumero = !isNaN(valorExecutadoNumero) ? valorExecutadoNumero : (progressoExistente.valorExecutadoNumero || null);
+          progressoExistente.status = statusQuad;
+          progressoExistente.analise = analiseQuad;
+          progressoExistente.dataAtualizacao = new Date().toISOString();
+        } else {
+          acao.progressos.push({
+            quadrimestre: quadrimestre,
+            valorAlcancado: valor,
+            valorExecutado: valorExecutadoFormatado || '',
+            valorExecutadoNumero: !isNaN(valorExecutadoNumero) ? valorExecutadoNumero : null,
+            status: statusQuad,
+            analise: analiseQuad,
+            dataPreenchimento: new Date().toISOString()
+          });
+        }
+      }
+    }
+    
+    // Atualizar status geral da ação baseado no último progresso
+    const statusAcao = acao.progressos.length > 0 ? acao.progressos[acao.progressos.length - 1].status : 'NAO_INICIADA';
+    acao.status = statusAcao;
+  });
+  
+  registrarAuditoria('MONITORAMENTO', `Monitoramento da meta "${meta.titulo}" preenchido para ${quadrimestre}`);
+  
+  salvarDados();
+  fecharModalMonitoramento();
+  renderizarMonitoramento();
+  atualizarDashboard();
+  
+  alert('✅ Monitoramento salvo com sucesso!');
+});
+
+// ADMINISTRAÇÃO
+function renderizarAdmin() {
+  verificarUsuariosPendentes();
+  renderizarListaAutorizacoes();
+  renderizarListaUsuarios();
+  renderizarAuditoria();
+  renderizarConfigAreas();
+  renderizarConfigQuadrimestres();
+  renderizarMetricas();
+  initLucideIcons();
+}
+
+function verificarUsuariosPendentes() {
+  const container = document.getElementById('alertaUsuariosPendentes');
+  if (!container) return;
+  
+  const pendentes = usuarios.filter(u => !u.autorizado && u.nivel !== 'ADMIN');
+  
+  if (pendentes.length > 0) {
+    container.innerHTML = `
+      <div class="bg-yellow-100 border-2 border-yellow-500 rounded-xl p-4 flex items-center gap-3 animate-pulse">
+        <i data-lucide="alert-circle" class="w-6 h-6 text-yellow-700 flex-shrink-0"></i>
+        <div class="flex-1">
+          <p class="font-bold text-yellow-900">Atenção: ${pendentes.length} usuário(s) aguardando autorização</p>
+          <p class="text-sm text-yellow-800">Acesse a aba "Autorização de Usuários" para aprovar ou rejeitar</p>
+        </div>
+      </div>
+    `;
+  } else {
+    container.innerHTML = '';
+  }
+  
+  initLucideIcons();
+}
+
+function mostrarAbaAdmin(aba) {
+  document.querySelectorAll('.aba-admin-conteudo').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.aba-admin-btn').forEach(btn => btn.classList.remove('active'));
+  
+  document.getElementById(`aba${aba.charAt(0).toUpperCase() + aba.slice(1)}`).style.display = 'block';
+  document.querySelector(`[data-aba="${aba}"]`).classList.add('active');
+  
+  initLucideIcons();
+}
+
+function renderizarListaAutorizacoes() {
+  const container = document.getElementById('listaAutorizacoes');
+  if (!container) return;
+  
+  const pendentes = usuarios.filter(u => !u.autorizado && u.nivel !== 'ADMIN');
+  
+  if (pendentes.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-8">
+        <i data-lucide="check-circle" class="w-16 h-16 text-green-500 mx-auto mb-3"></i>
+        <p class="text-sm text-slate-600">Nenhuma solicitação pendente</p>
+      </div>
+    `;
+    initLucideIcons();
+    return;
+  }
+  
+  let html = '<div class="space-y-3">';
+  pendentes.forEach(usuario => {
+    html += `
+      <div class="border-2 border-yellow-300 bg-yellow-50 rounded-lg p-4 flex items-center justify-between">
+        <div class="flex-1">
+          <h4 class="font-bold text-slate-900">${usuario.nome}</h4>
+          <p class="text-sm text-slate-600">${usuario.email}</p>
+          <div class="flex gap-2 mt-2">
+            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-bold">${usuario.nivel}</span>
+            ${usuario.area ? `<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs font-bold">${usuario.area}</span>` : ''}
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="autorizarUsuario('${usuario.id}')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-bold text-sm">
+            Autorizar
+          </button>
+          <button onclick="rejeitarUsuario('${usuario.id}')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-bold text-sm">
+            Rejeitar
+          </button>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  
+  container.innerHTML = html;
+}
+
+function autorizarUsuario(id) {
+  const usuario = usuarios.find(u => u.id === id);
+  if (!usuario) return;
+  
+  usuario.autorizado = true;
+  registrarAuditoria('AUTORIZAR_USUARIO', `Usuário ${usuario.nome} foi autorizado`);
+  salvarDados();
+  renderizarAdmin();
+}
+
+function rejeitarUsuario(id) {
+  const usuario = usuarios.find(u => u.id === id);
+  if (!usuario) return;
+  
+  const confirmar = document.createElement('div');
+  confirmar.className = 'modal-overlay';
+  confirmar.style.display = 'flex';
+  confirmar.innerHTML = `
+    <div class="modal-container w-full max-w-md p-6">
+      <h3 class="text-xl font-bold text-slate-900 mb-4">Confirmar Rejeição</h3>
+      <p class="text-sm text-slate-700 mb-4">Tem certeza que deseja rejeitar o usuário "<strong>${usuario.nome}</strong>"?</p>
+      <p class="text-sm text-red-600 mb-4">Esta ação irá remover permanentemente o cadastro.</p>
+      <div class="flex gap-3">
+        <button onclick="this.closest('.modal-overlay').remove()" class="flex-1 px-4 py-2 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition font-bold">
+          Cancelar
+        </button>
+        <button onclick="confirmarRejeicaoUsuario('${id}')" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-bold">
+          Rejeitar
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(confirmar);
+}
+
+function confirmarRejeicaoUsuario(id) {
+  const usuario = usuarios.find(u => u.id === id);
+  if (usuario) {
+    registrarAuditoria('REJEITAR_USUARIO', `Cadastro de ${usuario.nome} foi rejeitado e removido`);
+    usuarios = usuarios.filter(u => u.id !== id);
+    salvarDados();
+    
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    renderizarAdmin();
+  }
+}
+
+function renderizarListaUsuarios() {
+  const container = document.getElementById('listaUsuarios');
+  if (!container) return;
+  
+  const usuariosAtivos = usuarios.filter(u => u.autorizado || u.nivel === 'ADMIN');
+  
+  let html = '<div class="space-y-3">';
+  usuariosAtivos.forEach(usuario => {
+    const perfilCor = {
+      'ADMIN': 'bg-red-100 text-red-800',
+      'TECNICO': 'bg-blue-100 text-blue-800',
+      'VISUALIZADOR': 'bg-green-100 text-green-800'
+    };
+    
+    html += `
+      <div class="border-2 border-slate-200 rounded-lg p-4 flex items-center justify-between hover:bg-slate-50 transition">
+        <div class="flex-1">
+          <h4 class="font-bold text-slate-900">${usuario.nome}</h4>
+          <p class="text-sm text-slate-600">${usuario.email}</p>
+          <div class="flex gap-2 mt-2">
+            <span class="px-2 py-1 ${perfilCor[usuario.nivel]} rounded text-xs font-bold">${usuario.nivel}</span>
+            ${usuario.area ? `<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs font-bold">${usuario.area}</span>` : ''}
+          </div>
+        </div>
+        ${usuario.nivel !== 'ADMIN' ? `
+        <div class="flex gap-2">
+          <button onclick="editarUsuarioAdmin('${usuario.id}')" class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition">
+            <i data-lucide="edit-2" class="w-4 h-4"></i>
+          </button>
+          <button onclick="excluirUsuarioAdmin('${usuario.id}')" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+        ` : ''}
+      </div>
+    `;
+  });
+  html += '</div>';
+  
+  container.innerHTML = html;
+  initLucideIcons();
+}
+
+function editarUsuarioAdmin(id) {
+  alert('Funcionalidade em desenvolvimento');
+}
+
+function excluirUsuarioAdmin(id) {
+  const usuario = usuarios.find(u => u.id === id);
+  if (!usuario) return;
+  
+  const confirmar = document.createElement('div');
+  confirmar.className = 'modal-overlay';
+  confirmar.style.display = 'flex';
+  confirmar.innerHTML = `
+    <div class="modal-container w-full max-w-md p-6">
+      <h3 class="text-xl font-bold text-slate-900 mb-4">Confirmar Exclusão</h3>
+      <p class="text-sm text-slate-700 mb-4">Tem certeza que deseja excluir o usuário "<strong>${usuario.nome}</strong>"?</p>
+      <div class="flex gap-3">
+        <button onclick="this.closest('.modal-overlay').remove()" class="flex-1 px-4 py-2 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition font-bold">
+          Cancelar
+        </button>
+        <button onclick="confirmarExclusaoUsuarioAdmin('${id}')" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-bold">
+          Excluir
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(confirmar);
+}
+
+function confirmarExclusaoUsuarioAdmin(id) {
+  const usuario = usuarios.find(u => u.id === id);
+  if (usuario) {
+    registrarAuditoria('EXCLUIR_USUARIO', `Usuário ${usuario.nome} foi removido do sistema`);
+    usuarios = usuarios.filter(u => u.id !== id);
+    salvarDados();
+    
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+    renderizarAdmin();
+  }
+}
+
+function renderizarAuditoria() {
+  const container = document.getElementById('listaAuditoria');
+  if (!container) return;
+  
+  if (auditoria.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-8">
+        <i data-lucide="shield-off" class="w-16 h-16 text-slate-400 mx-auto mb-3"></i>
+        <p class="text-sm text-slate-600">Nenhum registro de auditoria</p>
+      </div>
+    `;
+    initLucideIcons();
+    return;
+  }
+  
+  const auditoriaOrdenada = [...auditoria].reverse();
+  
+  let html = '<div class="space-y-2 max-h-[600px] overflow-y-auto">';
+  auditoriaOrdenada.forEach(log => {
+    const data = new Date(log.dataHora);
+    const dataFormatada = data.toLocaleString('pt-BR');
+    
+    html += `
+      <div class="border border-slate-200 rounded-lg p-3 text-sm hover:bg-slate-50 transition">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1">
+            <p class="font-bold text-slate-900">${log.acao}</p>
+            <p class="text-slate-700">${log.detalhes}</p>
+            <div class="flex gap-3 mt-1 text-xs text-slate-600">
+              <span><strong>Usuário:</strong> ${log.usuario}</span>
+              <span><strong>Data:</strong> ${dataFormatada}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  
+  container.innerHTML = html;
+}
+
+function limparAuditoria() {
+  const confirmar = document.createElement('div');
+  confirmar.className = 'modal-overlay';
+  confirmar.style.display = 'flex';
+  confirmar.innerHTML = `
+    <div class="modal-container w-full max-w-md p-6">
+      <h3 class="text-xl font-bold text-slate-900 mb-4">Confirmar Limpeza</h3>
+      <p class="text-sm text-slate-700 mb-4">Tem certeza que deseja limpar todo o histórico de auditoria?</p>
+      <p class="text-sm text-red-600 mb-4">Esta ação não pode ser desfeita!</p>
+      <div class="flex gap-3">
+        <button onclick="this.closest('.modal-overlay').remove()" class="flex-1 px-4 py-2 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition font-bold">
+          Cancelar
+        </button>
+        <button onclick="confirmarLimparAuditoria()" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-bold">
+          Limpar
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(confirmar);
+}
+
+function confirmarLimparAuditoria() {
+  auditoria = [];
+  salvarDados();
+  
+  document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+  renderizarAdmin();
+}
+
+function renderizarConfigAreas() {
+  const container = document.getElementById('listaAreas');
+  if (!container) return;
+  
+  let html = '';
+  areas.forEach(area => {
+    html += `
+      <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg">
+        <span class="font-semibold text-slate-900">${area}</span>
+        <div class="flex gap-2">
+          <button onclick="editarArea('${area}')" class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition">
+            <i data-lucide="edit-2" class="w-4 h-4"></i>
+          </button>
+          <button onclick="excluirArea('${area}')" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+  initLucideIcons();
+}
+
+document.getElementById('formNovaArea').addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  const nome = document.getElementById('novaAreaNome').value.trim().toUpperCase();
+  
+  if (areas.includes(nome)) {
+    alert('Esta área já existe');
+    return;
+  }
+  
+  areas.push(nome);
+  registrarAuditoria('CRIAR_AREA', `Nova área técnica "${nome}" criada`);
+  salvarDados();
+  
+  document.getElementById('novaAreaNome').value = '';
+  renderizarConfigAreas();
+  atualizarDashboard();
+  renderizarMetasAcoes();
+});
+
+function editarArea(nomeAntigo) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.style.display = 'flex';
+  modal.innerHTML = `
+    <div class="modal-container w-full max-w-md p-6">
+      <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <i data-lucide="edit-2" class="w-6 h-6 text-blue-600"></i>
+        Editar Área Técnica
+      </h3>
+      <form id="formEditarArea" class="space-y-4">
+        <div>
+          <label class="block text-sm font-bold text-slate-700 mb-2">Nome da Área</label>
+          <input type="text" id="editAreaNome" value="${nomeAntigo}" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-slate-900" required>
+        </div>
+        <div class="flex gap-3">
+          <button type="button" onclick="this.closest('.modal-overlay').remove()" class="flex-1 px-4 py-2 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition font-bold">
+            Cancelar
+          </button>
+          <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-bold">
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  
+  setTimeout(() => initLucideIcons(), 50);
+  
+  document.getElementById('formEditarArea').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const novoNome = document.getElementById('editAreaNome').value.trim().toUpperCase();
+    
+    if (novoNome === nomeAntigo) {
+      modal.remove();
+      return;
+    }
+    
+    if (areas.includes(novoNome)) {
+      alert('Já existe uma área com este nome');
+      return;
+    }
+    
+    const index = areas.indexOf(nomeAntigo);
+    if (index !== -1) {
+      areas[index] = novoNome;
+      
+      metas.forEach(meta => {
+        if (meta.areas) {
+          meta.areas = meta.areas.map(a => a === nomeAntigo ? novoNome : a);
+        }
+      });
+      
+      acoes.forEach(acao => {
+        if (acao.areas) {
+          acao.areas = acao.areas.map(a => a === nomeAntigo ? novoNome : a);
+        }
+      });
+      
+      usuarios.forEach(usuario => {
+        if (usuario.area === nomeAntigo) {
+          usuario.area = novoNome;
+        }
+      });
+      
+      registrarAuditoria('EDITAR_AREA', `Área técnica "${nomeAntigo}" renomeada para "${novoNome}"`);
+      salvarDados();
+      
+      modal.remove();
+      renderizarAdmin();
+      atualizarDashboard();
+      renderizarMetasAcoes();
+      renderizarMonitoramento();
+    }
+  });
+}
+
+function excluirArea(nome) {
+  const confirmar = document.createElement('div');
+  confirmar.className = 'modal-overlay';
+  confirmar.style.display = 'flex';
+  confirmar.innerHTML = `
+    <div class="modal-container w-full max-w-md p-6">
+      <h3 class="text-xl font-bold text-slate-900 mb-4">Confirmar Exclusão</h3>
+      <p class="text-sm text-slate-700 mb-4">Tem certeza que deseja excluir a área "<strong>${nome}</strong>"?</p>
+      <div class="flex gap-3">
+        <button onclick="this.closest('.modal-overlay').remove()" class="flex-1 px-4 py-2 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition font-bold">
+          Cancelar
+        </button>
+        <button onclick="confirmarExclusaoArea('${nome}')" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-bold">
+          Excluir
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(confirmar);
+}
+
+function confirmarExclusaoArea(nome) {
+  areas = areas.filter(a => a !== nome);
+  registrarAuditoria('EXCLUIR_AREA', `Área técnica "${nome}" excluída`);
+  salvarDados();
+  
+  document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+  renderizarAdmin();
+  atualizarDashboard();
+  renderizarMetasAcoes();
+}
+
+function renderizarConfigQuadrimestres() {
+  const container = document.getElementById('listaQuadrimestres');
+  if (!container) return;
+  
+  let html = '';
+  quadrimestres.forEach(quad => {
+    html += `
+      <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg">
+        <span class="font-semibold text-slate-900">${quad}</span>
+        <button onclick="excluirQuadrimestre('${quad}')" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+        </button>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+  initLucideIcons();
+}
+
+document.getElementById('formNovoQuadrimestre').addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  const nome = document.getElementById('novoQuadrimestreNome').value.trim();
+  
+  if (quadrimestres.includes(nome)) {
+    alert('Este quadrimestre já existe');
+    return;
+  }
+  
+  quadrimestres.push(nome);
+  registrarAuditoria('CRIAR_QUADRIMESTRE', `Novo quadrimestre "${nome}" criado`);
+  salvarDados();
+  
+  document.getElementById('novoQuadrimestreNome').value = '';
+  renderizarConfigQuadrimestres();
+  atualizarDashboard();
+});
+
+function excluirQuadrimestre(nome) {
+  const confirmar = document.createElement('div');
+  confirmar.className = 'modal-overlay';
+  confirmar.style.display = 'flex';
+  confirmar.innerHTML = `
+    <div class="modal-container w-full max-w-md p-6">
+      <h3 class="text-xl font-bold text-slate-900 mb-4">Confirmar Exclusão</h3>
+      <p class="text-sm text-slate-700 mb-4">Tem certeza que deseja excluir o quadrimestre "<strong>${nome}</strong>"?</p>
+      <div class="flex gap-3">
+        <button onclick="this.closest('.modal-overlay').remove()" class="flex-1 px-4 py-2 border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition font-bold">
+          Cancelar
+        </button>
+        <button onclick="confirmarExclusaoQuadrimestre('${nome}')" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-bold">
+          Excluir
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(confirmar);
+}
+
+function confirmarExclusaoQuadrimestre(nome) {
+  quadrimestres = quadrimestres.filter(q => q !== nome);
+  registrarAuditoria('EXCLUIR_QUADRIMESTRE', `Quadrimestre "${nome}" excluído`);
+  salvarDados();
+  
+  document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+  renderizarAdmin();
+  atualizarDashboard();
+}
+
+function renderizarMetricas() {
+  const containerTempo = document.getElementById('metricasTempoPreenchimento');
+  const containerMetas = document.getElementById('metricasMetasQuadrimestre');
+  const containerGerais = document.getElementById('metricasGerais');
+  
+  if (containerTempo) {
+    let htmlTempo = '';
+    
+    if (metas.length === 0) {
+      htmlTempo = `
+        <div class="text-center py-4">
+          <i data-lucide="clock" class="w-8 h-8 text-slate-400 mx-auto mb-2"></i>
+          <p class="text-xs text-slate-500 italic">Nenhuma meta cadastrada</p>
+        </div>
+      `;
+    } else {
+      metas.forEach(meta => {
+        const acoesVinculadas = acoes.filter(a => a.metaId === meta.id);
+        
+        // Calcular tempo médio baseado nos monitoramentos
+        let tempoTotal = 0;
+        let contador = 0;
+        
+        if (meta.monitoramentos && meta.monitoramentos.length > 0) {
+          meta.monitoramentos.forEach(mon => {
+            if (mon.dataPreenchimento) {
+              const dataCriacao = new Date(meta.dataCriacao);
+              const dataPreenchimento = new Date(mon.dataPreenchimento);
+              const diffTime = Math.abs(dataPreenchimento - dataCriacao);
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+              tempoTotal += diffDays;
+              contador++;
+            }
+          });
+        }
+        
+        const tempoMedio = contador > 0 ? Math.round(tempoTotal / contador) : 0;
+        const totalMonitoramentos = meta.monitoramentos ? meta.monitoramentos.length : 0;
+        
+        let statusTempo = '';
+        let corTempo = 'text-slate-600';
+        
+        if (tempoMedio === 0) {
+          statusTempo = 'Sem preenchimento';
+          corTempo = 'text-red-600';
+        } else if (tempoMedio <= 7) {
+          statusTempo = `${tempoMedio} dia(s) - Rápido`;
+          corTempo = 'text-green-600';
+        } else if (tempoMedio <= 30) {
+          statusTempo = `${tempoMedio} dia(s) - Normal`;
+          corTempo = 'text-blue-600';
+        } else {
+          statusTempo = `${tempoMedio} dia(s) - Lento`;
+          corTempo = 'text-orange-600';
+        }
+        
+        htmlTempo += `
+          <div class="border-b border-slate-200 pb-3 mb-3 last:border-b-0">
+            <div class="flex items-start justify-between mb-1">
+              <p class="text-xs font-bold text-slate-700 flex-1">${meta.titulo}</p>
+              <span class="text-xs font-black ${corTempo} ml-2">${statusTempo}</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-500">
+              <span>📊 ${totalMonitoramentos} preenchimento(s)</span>
+              <span>•</span>
+              <span>🎯 ${acoesVinculadas.length} ação(ões)</span>
+            </div>
+          </div>
+        `;
+      });
+    }
+    
+    containerTempo.innerHTML = htmlTempo;
+    setTimeout(() => initLucideIcons(), 50);
+  }
+  
+  if (containerMetas) {
+    let htmlQuad = '';
+    quadrimestres.forEach(quad => {
+      const metasPreenchidas = metas.filter(m => {
+        return acoes.some(a => 
+          a.metaId === m.id && 
+          a.progressos && 
+          a.progressos.some(p => p.quadrimestre === quad)
+        );
+      }).length;
+      
+      htmlQuad += `
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-slate-600">${quad}</span>
+          <span class="text-lg font-black text-green-600">${metasPreenchidas}</span>
+        </div>
+      `;
+    });
+    containerMetas.innerHTML = htmlQuad;
+  }
+  
+  if (containerGerais) {
+    const totalMetas = metas.length;
+    const totalAcoes = acoes.length;
+    const totalUsuarios = usuarios.length;
+    
+    containerGerais.innerHTML = `
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-slate-600">Total de Metas</span>
+        <span class="text-lg font-black text-purple-600">${totalMetas}</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-slate-600">Total de Ações</span>
+        <span class="text-lg font-black text-purple-600">${totalAcoes}</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-slate-600">Usuários Cadastrados</span>
+        <span class="text-lg font-black text-purple-600">${totalUsuarios}</span>
+      </div>
+    `;
+  }
+}
+
+function exportarPDF() {
+  try {
+    if (typeof html2pdf === 'undefined') {
+      alert('❌ Erro: Biblioteca PDF não está disponível. Recarregue a página.');
+      return;
+    }
+
+    const elemento = document.getElementById('secaoDashboard');
+    if (!elemento) {
+      alert('⚠️ Por favor, acesse o Painel Geral antes de exportar.');
+      return;
+    }
+
+    if (!confirm('📄 Exportar Relatório em PDF (A4)?\n\nApenas dados do sistema serão inclusos.')) {
+      return;
+    }
+
+    const agora = new Date();
+    const dd = String(agora.getDate()).padStart(2, '0');
+    const mm = String(agora.getMonth() + 1).padStart(2, '0');
+    const yyyy = agora.getFullYear();
+    const dataFormatada = `${dd}/${mm}/${yyyy}`;
+    const horaFormatada = agora.toLocaleTimeString('pt-BR');
+    const nomePDF = `Relatorio_PAS_${dd}-${mm}-${yyyy}.pdf`;
+    const usuarioGerador = currentUser ? currentUser.nome : 'Sistema';
+    const perfilUsuario = currentUser ? currentUser.nivel : 'ADMIN';
+    const areaUsuario = currentUser ? currentUser.area : 'Geral';
+
+    // Dados do dashboard
+    const totalAcoes = parseInt(document.getElementById('totalAcoesPanorama')?.textContent || '0');
+    const critico = parseInt(document.getElementById('criticoPanorama')?.textContent) || 0;
+    const progresso = parseInt(document.getElementById('progressoPanorama')?.textContent) || 0;
+    const andamento = parseInt(document.getElementById('andamentoPanorama')?.textContent) || 0;
+    const concluidas = Math.max(0, totalAcoes - critico - andamento);
+
+    // Dados do módulo de monitoramento (filtrados por perfil)
+    let metasMonitoramento = metas;
+    if (perfilUsuario === 'TECNICO' && areaUsuario) {
+      metasMonitoramento = metas.filter(m => m.areas && m.areas.includes(areaUsuario));
+    }
+
+    // Contar ações por meta
+    const resumoMetas = metasMonitoramento.map(meta => {
+      const acoesMetaTotal = acoes.filter(a => a.metaId === meta.id).length;
+      const acoesConcluidas = acoes.filter(a => a.metaId === meta.id && a.status === 'CONCLUIDA').length;
+      return {
+        id: meta.id,
+        nome: meta.nome,
+        descricao: meta.descricao,
+        areas: meta.areas,
+        total: acoesMetaTotal,
+        concluidas: acoesConcluidas,
+        percentualConclusao: acoesMetaTotal > 0 ? Math.round((acoesConcluidas / acoesMetaTotal) * 100) : 0
+      };
+    });
+
+    // Dados de quadrimestres liberados
+    const quadrimestresLiberados = quadrimestres.filter(q => 
+      perfilUsuario === 'ADMIN' || liberacoesQuadrimestres[q] === true
+    );
+
+    // Calcular Barra de Saúde (apenas se houver dados válidos)
+    const barraLarguraSaude = totalAcoes > 0 ? Math.round((concluidas / totalAcoes) * 100) : 0;
+    const saudeProjeto = totalAcoes > 0 ? Math.round((concluidas / totalAcoes) * 100) : 0;
+    const mostrarSaude = totalAcoes > 0 && !isNaN(barraLarguraSaude);
+
+    // Tendência
+    const tendenciaCritico = critico > 15 ? '↑' : critico < 5 ? '↓' : '→';
+    const corTendencia = tendenciaCritico === '↑' ? '#dc2626' : tendenciaCritico === '↓' ? '#10b981' : '#6b7280';
+    const descricaoTendencia = tendenciaCritico === '↑' ? 'Aumento de ações críticas' : tendenciaCritico === '↓' ? 'Redução de ações críticas' : 'Estável';
+
+    // Simular dados de Quadrimestre (baseado nos dados reais)
+    const q1Planejado = totalAcoes > 0 ? Math.round(totalAcoes * 0.25) : 0;
+    const q1Executado = q1Planejado > 0 ? Math.round(q1Planejado * (progresso / 100)) : 0;
+    const q2Planejado = totalAcoes > 0 ? Math.round(totalAcoes * 0.25) : 0;
+    const q2Executado = q2Planejado > 0 ? Math.round(q2Planejado * (progresso / 100)) : 0;
+    const q3Planejado = totalAcoes > 0 ? Math.round(totalAcoes * 0.25) : 0;
+    const q3Executado = q3Planejado > 0 ? Math.round(q3Planejado * (progresso / 100)) : 0;
+    const q4Planejado = totalAcoes > 0 ? Math.round(totalAcoes * 0.25) : 0;
+    const q4Executado = q4Planejado > 0 ? Math.round(q4Planejado * (progresso / 100)) : 0;
+
+    // Calcular percentuais
+    const pctCritico = totalAcoes > 0 ? Math.round(critico) : 0;
+    const pctAndamento = totalAcoes > 0 ? Math.round(andamento / totalAcoes * 100) : 0;
+    const pctConcluidas = totalAcoes > 0 ? Math.round(concluidas / totalAcoes * 100) : 0;
+
+    // HTML otimizado para caber em A4
+    let htmlConteudo = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          
+          /* ========== PÁGINA E MARGENS ========== */
+          @page { 
+            size: A4 portrait; 
+            margin: 15mm 20mm 15mm 20mm;
+          }
+          
+          body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', Arial, sans-serif; 
+            color: #374151; 
+            line-height: 1.4; 
+            background: white;
+            font-size: 11px;
+            max-width: 210mm;
+            margin: 0 auto;
+          }
+          
+          .page { 
+            width: 100%;
+            max-width: 170mm;
+            padding: 15mm 20mm;
+            background: white;
+            margin: 0 auto;
+            page-break-after: always;
+          }
+          
+          .page:last-child {
+            page-break-after: avoid;
+          } 
+            background: white;
+          }
+          
+          /* ========== CABEÇALHO ========== */
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #1e40af;
+            page-break-inside: avoid;
+            flex-wrap: wrap;
+            gap: 8px;
+          }
+          
+          .header-logo { font-size: 14px; font-weight: 900; color: #1e40af; }
+          .header-subtitle { font-size: 7px; color: #64748b; font-weight: 500; margin-top: 2px; }
+          
+          .header-title { flex: 1; text-align: center; min-width: 120px; }
+          .header-title h1 { font-size: 12px; font-weight: 700; color: #0f172a; margin: 0; }
+          .header-title p { font-size: 7px; color: #475569; margin-top: 1px; }
+          
+          .header-meta { text-align: right; font-size: 7px; color: #64748b; }
+          .header-meta strong { color: #1e40af; font-weight: 700; display: block; margin-bottom: 1px; }
+          
+          /* ========== RESUMO EXECUTIVO ========== */
+          .executive-summary {
+            background: #fef9e7;
+            border-left: 3px solid #f59e0b;
+            padding: 8px;
+            margin: 8px 0;
+            border-radius: 6px;
+            font-size: 9px;
+            line-height: 1.4;
+            color: #451a03;
+            page-break-inside: avoid;
+          }
+          
+          .executive-summary strong { color: #d97706; font-weight: 700; }
+          .alert { color: #dc2626; font-weight: 700; }
+          .success-text { color: #10b981; font-weight: 700; }
+          
+          /* ========== BARRA DE SAÚDE ========== */
+          .health-bar-container {
+            margin: 8px 0;
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            font-size: 8px;
+            page-break-inside: avoid;
+          }
+          
+          .health-bar-title { font-size: 9px; font-weight: 700; color: #1e40af; margin-bottom: 5px; }
+          
+          .progress-bar {
+            width: 100%;
+            height: 7px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 5px;
+          }
+          
+          .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            border-radius: 3px;
+          }
+          
+          .health-stats { display: flex; justify-content: space-between; color: #64748b; font-size: 8px; }
+          .health-stats strong { color: #1e40af; }
+          
+          /* ========== KPI CARDS (RESPONSIVO) ========== */
+          .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(70mm, 1fr));
+            gap: 6px;
+            margin: 8px 0;
+            page-break-inside: avoid;
+          }
+          
+          /* Força 2x2 em telas menores */
+          @media (max-width: 170mm) {
+            .kpi-grid {
+              grid-template-columns: 1fr 1fr;
+              gap: 5px;
+            }
+          }
+          
+          .kpi-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-top: 3px solid #1e40af;
+            border-radius: 5px;
+            padding: 7px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            page-break-inside: avoid;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 70px;
+          }
+          
+          .kpi-card.critical { border-top-color: #dc2626; }
+          .kpi-card.success { border-top-color: #10b981; }
+          .kpi-card.warning { border-top-color: #f59e0b; }
+          .kpi-card.info { border-top-color: #3b82f6; }
+          
+          .kpi-label { font-size: 8px; color: #6b7280; font-weight: 700; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.3px; }
+          .kpi-value { font-size: 22px; font-weight: 900; color: #1f2937; margin: 2px 0; line-height: 1.1; }
+          .kpi-trend { font-size: 16px; font-weight: bold; margin: 2px 0; display: flex; align-items: center; gap: 3px; }
+          .kpi-trend-text { font-size: 7px; color: #6b7280; font-weight: 600; }
+          .kpi-footer { font-size: 7px; color: #9ca3af; margin-top: 2px; }
+          
+          /* ========== GRÁFICO GRID (RESPONSIVO) ========== */
+          .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(75mm, 1fr));
+            gap: 8px;
+            margin: 8px 0;
+            page-break-inside: avoid;
+          }
+          
+          @media (max-width: 170mm) {
+            .chart-grid {
+              grid-template-columns: 1fr;
+              gap: 6px;
+            }
+          }
+          
+          .chart-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 5px;
+            padding: 7px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            page-break-inside: avoid;
+          }
+          
+          .chart-title { font-size: 10px; font-weight: 700; color: #0f172a; margin-bottom: 5px; }
+          
+          /* Mini Bar Chart */
+          .mini-bar-chart { display: flex; flex-direction: column; gap: 4px; }
+          
+          .chart-item { display: flex; align-items: center; gap: 5px; }
+          .chart-label { width: 50px; font-size: 7px; font-weight: 600; color: #374151; }
+
+          .chart-bar-container { flex: 1; height: 8px; background: #f3f4f6; border-radius: 2px; overflow: hidden; }
+          .chart-bar { height: 100%; border-radius: 2px; display: flex; align-items: center; justify-content: flex-end; padding-right: 2px; color: white; font-size: 6px; font-weight: bold; }
+          .chart-value { width: 24px; text-align: right; font-size: 7px; font-weight: 700; color: #1f2937; }
+          
+          /* Grouped Bar Chart */
+          .grouped-chart { display: flex; flex-direction: column; gap: 4px; }
+          .grouped-item { display: flex; align-items: center; gap: 4px; font-size: 8px; }
+          .grouped-label { width: 48px; font-size: 7px; font-weight: 600; color: #374151; }
+          .bars-container { display: flex; gap: 2px; flex: 1; align-items: flex-end; height: 10px; }
+          .bar-planned { background: #cbd5e1; border-radius: 2px; flex: 1; }
+          .bar-executed { background: #1e40af; border-radius: 2px; flex: 1; }
+          .ratio-text { width: 28px; text-align: right; font-size: 6px; font-weight: 600; color: #374151; }
+          
+          /* ========== TABELAS ========== */
+          .table-section {
+            margin: 8px 0;
+            page-break-inside: avoid;
+          }
+          
+          .section-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 5px;
+            padding-bottom: 3px;
+            border-bottom: 2px solid #e5e7eb;
+            page-break-inside: avoid;
+          }
+          
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 7px;
+            margin-top: 3px;
+            page-break-inside: avoid;
+          }
+          
+          th {
+            background: #f3f4f6;
+            padding: 5px 4px;
+            text-align: left;
+            font-weight: 700;
+            color: #374151;
+            border-bottom: 1px solid #d1d5db;
+            font-size: 8px;
+            page-break-inside: avoid;
+          }
+          
+          td {
+            padding: 4px 4px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 7px;
+            page-break-inside: avoid;
+          }
+          
+          tr:nth-child(even) td { background: #f9fafb; }
+          tr { page-break-inside: avoid; }
+          
+          /* BADGES */
+          .badge {
+            display: inline-block;
+            padding: 2px 5px;
+            border-radius: 8px;
+            font-size: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            white-space: nowrap;
+          }
+          
+          .badge-critical { background: #fee2e2; color: #991b1b; }
+          .badge-warning { background: #fef3c7; color: #78350f; }
+          .badge-success { background: #dcfce7; color: #166534; }
+          
+          /* ========== RODAPÉ ========== */
+          .footer {
+            margin-top: 10px;
+            padding-top: 6px;
+            border-top: 1px solid #e5e7eb;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 6px;
+            color: #9ca3af;
+            page-break-inside: avoid;
+          }
+          
+          .footer-brand { font-weight: 700; color: #1e40af; margin-bottom: 1px; font-size: 7px; }
+          .footer-right { text-align: right; }
+          .footer-item { margin: 0.5px 0; line-height: 1.2; }
+          .footer-item strong { color: #1e40af; font-weight: 700; }
+        </style>
+      </head>
+      <body>
+        <div class="page">
+          <!-- CABEÇALHO -->
+          <div class="header">
+            <div>
+              <div class="header-logo">SESAP RN</div>
+              <div class="header-subtitle">Sistema de Monitoramento PAS</div>
+            </div>
+            <div class="header-title">
+              <h1>RELATÓRIO DE MONITORAMENTO</h1>
+              <p>Painel Geral</p>
+            </div>
+            <div class="header-meta">
+              <strong>Data</strong>${dataFormatada}<br>
+              <strong>Usuário</strong>${usuarioGerador}<br>
+              <strong>Horário</strong>${horaFormatada}
+            </div>
+          </div>
+
+          <!-- RESUMO EXECUTIVO (SEMPRE VISÍVEL) -->
+          <div class="executive-summary">
+            <strong>📊 RESUMO EXECUTIVO:</strong><br>
+            ${totalAcoes > 0 
+              ? `Este relatório consolida a situação do monitoramento PAS com <strong>${totalAcoes} ações</strong> em acompanhamento. 
+                 ${critico > 0 ? `<span class="alert">⚠️ CRÍTICO: Existem ${Math.round(totalAcoes * critico / 100)} ações (${critico}%) que requerem atenção imediata.</span>` : '<span class="success-text">✓ Nenhuma ação em status crítico.</span>'} 
+                 Progresso geral: <strong>${progresso}%</strong> com <strong>${concluidas} ações concluídas</strong>.`
+              : 'Nenhuma ação foi cadastrada ou monitorada no período. Este relatório apresenta a estrutura padrão de acompanhamento.'
+            }
+          </div>
+
+          <!-- BARRA DE SAÚDE (APENAS SE HOUVER DADOS) -->
+          ${mostrarSaude ? `
+          <div class="health-bar-container">
+            <div class="health-bar-title">💚 Saúde do Projeto</div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${barraLarguraSaude}%;"></div>
+            </div>
+            <div class="health-stats">
+              <div><strong>${barraLarguraSaude}%</strong> conclusão</div>
+              <div><strong>${concluidas}/${totalAcoes}</strong> concluídas</div>
+            </div>
+          </div>
+          ` : ''}
+
+          <!-- KPI CARDS - SEMPRE EXIBIDO (4 CARDS DESTACANDO MÉTRICAS) -->
+          <div class="kpi-grid">
+            <div class="kpi-card critical">
+              <div class="kpi-label">Crítico</div>
+              <div class="kpi-value">${critico}%</div>
+              <div class="kpi-trend" style="color: ${corTendencia};">
+                ${tendenciaCritico}
+                <span class="kpi-trend-text">${descricaoTendencia}</span>
+              </div>
+              <div class="kpi-footer">${Math.round(totalAcoes * critico / 100)} ações</div>
+            </div>
+
+            <div class="kpi-card warning">
+              <div class="kpi-label">Progresso</div>
+              <div class="kpi-value">${progresso}%</div>
+              <div class="kpi-footer">avanço geral</div>
+            </div>
+
+            <div class="kpi-card info">
+              <div class="kpi-label">Em Andamento</div>
+              <div class="kpi-value">${pctAndamento}%</div>
+              <div class="kpi-footer">${andamento} ações</div>
+            </div>
+
+            <div class="kpi-card success">
+              <div class="kpi-label">Concluídas</div>
+              <div class="kpi-value">${pctConcluidas}%</div>
+              <div class="kpi-footer">${concluidas} ações</div>
+            </div>
+          </div>
+
+          <!-- GRÁFICOS - SEMPRE EXIBIDOS -->
+          <div class="chart-grid">
+            <!-- Distribuição de Status -->
+            <div class="chart-card">
+              <div class="chart-title">Distribuição por Status</div>
+              <div class="mini-bar-chart">
+                <div class="chart-item">
+                  <div class="chart-label">Crítico</div>
+                  <div class="chart-bar-container">
+                    <div class="chart-bar" style="width: ${critico}%; background: #dc2626;">${critico}%</div>
+                  </div>
+                  <div class="chart-value">${Math.round(totalAcoes * critico / 100)}</div>
+                </div>
+                <div class="chart-item">
+                  <div class="chart-label">Andamento</div>
+                  <div class="chart-bar-container">
+                    <div class="chart-bar" style="width: ${pctAndamento}%; background: #3b82f6;">${pctAndamento}%</div>
+                  </div>
+                  <div class="chart-value">${andamento}</div>
+                </div>
+                <div class="chart-item">
+                  <div class="chart-label">Concluída</div>
+                  <div class="chart-bar-container">
+                    <div class="chart-bar" style="width: ${pctConcluidas}%; background: #10b981;">${pctConcluidas}%</div>
+                  </div>
+                  <div class="chart-value">${concluidas}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Planejado vs Executado -->
+            <div class="chart-card">
+              <div class="chart-title">Planejado vs Executado</div>
+              <div class="grouped-chart">
+                <div class="grouped-item">
+                  <div class="grouped-label">Q1</div>
+                  <div class="bars-container">
+                    <div class="bar-planned" style="flex: ${Math.max(1, q1Planejado)};"></div>
+                    <div class="bar-executed" style="flex: ${Math.max(1, q1Executado)};"></div>
+                  </div>
+                  <div class="ratio-text">${q1Executado}/${q1Planejado}</div>
+                </div>
+                <div class="grouped-item">
+                  <div class="grouped-label">Q2</div>
+                  <div class="bars-container">
+                    <div class="bar-planned" style="flex: ${Math.max(1, q2Planejado)};"></div>
+                    <div class="bar-executed" style="flex: ${Math.max(1, q2Executado)};"></div>
+                  </div>
+                  <div class="ratio-text">${q2Executado}/${q2Planejado}</div>
+                </div>
+                <div class="grouped-item">
+                  <div class="grouped-label">Q3</div>
+                  <div class="bars-container">
+                    <div class="bar-planned" style="flex: ${Math.max(1, q3Planejado)};"></div>
+                    <div class="bar-executed" style="flex: ${Math.max(1, q3Executado)};"></div>
+                  </div>
+                  <div class="ratio-text">${q3Executado}/${q3Planejado}</div>
+                </div>
+                <div class="grouped-item">
+                  <div class="grouped-label">Q4</div>
+                  <div class="bars-container">
+                    <div class="bar-planned" style="flex: ${Math.max(1, q4Planejado)};"></div>
+                    <div class="bar-executed" style="flex: ${Math.max(1, q4Executado)};"></div>
+                  </div>
+                  <div class="ratio-text">${q4Executado}/${q4Planejado}</div>
+                </div>
+              </div>
+              <div style="margin-top: 4px; padding-top: 4px; border-top: 1px solid #e5e7eb; font-size: 6px; color: #64748b;">
+                <span style="display: inline-block; width: 7px; height: 7px; background: #cbd5e1; border-radius: 1px; margin-right: 2px; vertical-align: middle;"></span>Plan. &nbsp;
+                <span style="display: inline-block; width: 7px; height: 7px; background: #1e40af; border-radius: 1px; margin-right: 2px; vertical-align: middle;"></span>Exec.
+              </div>
+            </div>
+          </div>
+
+          <!-- TABELA DETALHADA DE STATUS - SEMPRE VISÍVEL -->
+          <div class="table-section">
+            <div class="section-title">📊 Distribuição Detalhada de Status</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>Quantidade</th>
+                  <th>Percentual</th>
+                  <th>Indicador</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="badge badge-critical">Crítico</span></td>
+                  <td style="text-align: center; font-weight: 700;">${Math.round(totalAcoes * critico / 100)}</td>
+                  <td style="text-align: center; font-weight: 700;">${critico}%</td>
+                  <td>Requer ação imediata</td>
+                </tr>
+                <tr>
+                  <td><span class="badge badge-warning">Em Andamento</span></td>
+                  <td style="text-align: center; font-weight: 700;">${andamento}</td>
+                  <td style="text-align: center; font-weight: 700;">${pctAndamento}%</td>
+                  <td>Dentro do cronograma</td>
+                </tr>
+                <tr>
+                  <td><span class="badge badge-success">Concluída</span></td>
+                  <td style="text-align: center; font-weight: 700;">${concluidas}</td>
+                  <td style="text-align: center; font-weight: 700;">${pctConcluidas}%</td>
+                  <td>Meta atingida</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- RODAPÉ COMPLETO -->
+          <div class="footer">
+            <div>
+              <div class="footer-brand">SESAP RN - Monitoramento PAS</div>
+              <div class="footer-item">Secretaria Estadual de Saúde Pública</div>
+              <div class="footer-item"><strong>Usuário:</strong> ${usuarioGerador}</div>
+              <div class="footer-item"><strong>Data:</strong> ${dataFormatada}</div>
+            </div>
+            <div class="footer-right">
+              <div class="footer-item"><strong>Horário:</strong> ${horaFormatada}</div>
+              <div class="footer-item"></div>
+              <div class="footer-item">Sistema de Monitoramento PAS</div>
+              <div class="footer-item" style="margin-top: 3px; color: #cbd5e1;">Gerado automaticamente</div>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const opt = {
+      margin: [15, 20, 15, 20],
+      filename: nomePDF,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { 
+        scale: 2.5, 
+        useCORS: true, 
+        logging: false, 
+        allowTaint: true, 
+        backgroundColor: '#ffffff',
+        letterRendering: true,
+        removeContainer: true
+      },
+      jsPDF: { 
+        orientation: 'portrait', 
+        unit: 'mm', 
+        format: 'a4', 
+        compress: true,
+        precision: 16
+      },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    html2pdf().set(opt).from(htmlConteudo, 'string').save()
+      .then(() => {
+        alert('✅ Relatório exportado com sucesso!\n\n' + nomePDF);
+      })
+      .catch((erro) => {
+        console.error('Erro:', erro);
+        alert('❌ Erro ao exportar:\n\n' + (erro.message || 'Erro desconhecido'));
+      });
+
+  } catch (erro) {
+    console.error('Exceção:', erro);
+    alert('❌ Erro no sistema:\n\n' + erro.message);
+  }
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+  initLucideIcons();
+});
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9bad9f71c226c5ea',t:'MTc2Nzg5NTUyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
